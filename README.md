@@ -103,6 +103,20 @@ app/
 └── build.gradle.kts                # App-level build configuration
 ```
 
+## 📦 Deployment
+
+The app is ready for deployment. See deployment guides:
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Step-by-step deployment instructions (Recommended)
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment reference
+
+**Quick Deployment:**
+1. Build signed APK: `./gradlew assembleRelease`
+2. Host APK on web server or cloud storage
+3. Share download link with users
+4. Users install directly (no app store needed)
+
+**Note:** Firebase is **NOT required** for deployment. It's optional for analytics only.
+
 ## 📄 License
 
 [Add your license here]

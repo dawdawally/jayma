@@ -91,22 +91,73 @@ The APK will be generated at: `app/build/outputs/apk/release/app-release.apk`
 
 ## Distribution Methods
 
-### Option 1: Direct APK Distribution
-- Upload APK to file server
-- Provide download link to users
-- Users enable "Install from Unknown Sources"
+### ⭐ Recommended: Direct APK Distribution (Best for POS Systems)
 
-### Option 2: Google Play Store
-1. Create Google Play Developer account
-2. Create app listing
-3. Upload signed APK/AAB
-4. Complete store listing
-5. Submit for review
+**Why this is recommended:**
+- ✅ No app store approval needed
+- ✅ Full control over distribution
+- ✅ Quick deployment
+- ✅ Perfect for enterprise/internal use
+- ✅ No ongoing fees
+- ✅ Can update immediately
 
-### Option 3: Enterprise Distribution
-- Use MDM (Mobile Device Management) solution
-- Distribute via enterprise app store
-- OTA (Over-The-Air) updates
+**Steps:**
+1. Build signed release APK (see above)
+2. Upload APK to:
+   - Your own web server
+   - Cloud storage (Google Drive, Dropbox, OneDrive)
+   - File hosting service
+   - Internal company server
+3. Share download link with users
+4. Users download and install:
+   - Enable "Install from Unknown Sources" in Android settings
+   - Open downloaded APK file
+   - Tap "Install"
+
+**Update Process:**
+- Build new APK with incremented version
+- Upload to same location (replace old file or use versioned URLs)
+- Notify users to download new version
+- Users install over existing app (data preserved)
+
+### Option 2: Enterprise MDM Distribution
+
+**Best for:** Companies with multiple devices managed centrally
+
+**Benefits:**
+- ✅ Centralized device management
+- ✅ Automatic updates
+- ✅ Device policy enforcement
+- ✅ Remote installation
+
+**Popular MDM Solutions:**
+- Microsoft Intune
+- VMware Workspace ONE
+- MobileIron
+- SOTI MobiControl
+- Samsung Knox Manage
+
+### Option 3: Private App Store
+
+**Best for:** Organizations with internal app store
+
+**Options:**
+- Samsung Galaxy Store (Enterprise)
+- Huawei AppGallery (Enterprise)
+- Custom internal app store
+- F-Droid (open source alternative)
+
+### Option 4: OTA (Over-The-Air) Updates
+
+**Best for:** Automatic updates without user intervention
+
+**Implementation:**
+- Create update API endpoint
+- Check for updates on app launch
+- Download and install APK programmatically
+- Requires `REQUEST_INSTALL_PACKAGES` permission
+
+**Note:** This requires additional development work for update mechanism.
 
 ## Post-Deployment
 

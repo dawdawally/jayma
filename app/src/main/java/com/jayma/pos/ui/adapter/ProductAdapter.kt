@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.data.remote.ApiConfig
 import com.jayma.pos.databinding.ItemProductBinding
+import com.jayma.pos.util.StockAlertHelper
 
 class ProductAdapter(
     private val onItemClick: (ProductEntity) -> Unit
@@ -37,7 +38,21 @@ class ProductAdapter(
                 productName.text = product.name
                 productCode.text = product.code
                 productPrice.text = String.format("$%.2f", product.netPrice)
-                productStock.text = "Stock: ${product.qteSale.toInt()}"
+                
+                // Show stock with alert if low
+                val stockText = if (StockAlertHelper.isLowStock(product)) {
+                    "⚠️ Low Stock: ${product.qteSale.toInt()}"
+                } else {
+                    "Stock: ${product.qteSale.toInt()}"
+                }
+                productStock.text = stockText
+                productStock.setTextColor(
+                    if (StockAlertHelper.isLowStock(product)) {
+                        root.context.getColor(android.R.color.holo_red_dark)
+                    } else {
+                        root.context.getColor(android.R.color.darker_gray)
+                    }
+                )
                 productUnit.text = product.unitSale
 
                 // Load product image

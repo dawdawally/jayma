@@ -7,6 +7,7 @@ import com.jayma.pos.databinding.ActivityMainBinding
 import com.jayma.pos.sync.SyncInitializer
 import com.jayma.pos.ui.cart.CartFragment
 import com.jayma.pos.ui.products.ProductListFragment
+import com.jayma.pos.ui.reports.SalesReportFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,6 +49,12 @@ class MainActivity : AppCompatActivity() {
                 com.jayma.pos.R.id.nav_cart -> {
                     supportFragmentManager.beginTransaction()
                         .replace(binding.fragmentContainer.id, CartFragment())
+                        .commit()
+                    true
+                }
+                com.jayma.pos.R.id.nav_reports -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(binding.fragmentContainer.id, SalesReportFragment())
                         .commit()
                     true
                 }

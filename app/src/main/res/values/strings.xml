@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jayma POS</string>
+    
+    <!-- Common -->
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    
+    <!-- Network -->
+    <string name="no_internet">No internet connection</string>
+    <string name="sync_in_progress">Syncing…</string>
+    <string name="sync_complete">Sync complete</string>
+    <string name="sync_failed">Sync failed</string>
+    
+    <!-- Products -->
+    <string name="products">Products</string>
+    <string name="search_products">Search products</string>
+    <string name="no_products">No products found</string>
+    
+    <!-- Sales -->
+    <string name="sales">Sales</string>
+    <string name="cart">Cart</string>
+    <string name="checkout">Checkout</string>
+    <string name="total">Total</string>
+    
+    <!-- Receipt -->
+    <string name="receipt">Receipt</string>
+    <string name="print_receipt">Print Receipt</string>
+</resources>

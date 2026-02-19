@@ -1,0 +1,8 @@
+## This file is used to configure the Android build system.
+## It should NOT be checked into version control.
+
+# Location of the Android SDK
+sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+
+# For localhost API testing (optional)
+# api.base.url=http://10.0.2.2

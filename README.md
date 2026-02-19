@@ -42,7 +42,56 @@ The API is public (no authentication required).
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+- Android Studio Hedgehog (2023.1.1) or later
+- JDK 17 or later
+- Android SDK (API 21+)
+- Gradle 8.2+
+
+### Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/dawdawally/jayma.git
+cd jayma
+```
+
+2. Open the project in Android Studio
+
+3. Create `local.properties` file (copy from `local.properties.example`) and set your Android SDK path:
+```properties
+sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+```
+
+4. Sync Gradle and build the project
+
+### Development Status
+
+✅ **Phase 1:** API Integration & Understanding - Complete  
+🔄 **Phase 2:** Android Project Setup - In Progress  
+⏳ **Phase 3:** POS Initialization - Pending  
+⏳ **Phase 4:** Product Management - Pending  
+
 See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete development roadmap.
+
+### Project Structure
+
+```
+app/
+├── src/
+│   ├── main/
+│   │   ├── java/com/jayma/pos/
+│   │   │   ├── data/
+│   │   │   │   ├── local/          # Room database entities & DAOs
+│   │   │   │   ├── remote/         # API services & models
+│   │   │   │   └── repository/     # Repository implementations
+│   │   │   ├── di/                 # Hilt dependency injection modules
+│   │   │   └── ui/                 # Activities, Fragments, ViewModels
+│   │   └── res/                    # Resources (layouts, strings, etc.)
+│   └── test/                       # Unit tests
+└── build.gradle.kts                # App-level build configuration
+```
 
 ## 📄 License
 

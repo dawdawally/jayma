@@ -28,8 +28,10 @@ class PrinterService(private val context: Context) {
      */
     fun initialize(): Boolean {
         return try {
-            // TODO: Initialize SUNMI printer SDK
-            // Example: SunmiPrinterService.getInstance().initPrinter()
+            // TODO: Initialize SUNMI printer SDK using printerx library
+            // Refer to SUNMI documentation for actual API calls
+            // Example API might be: PrinterService.getInstance().initPrinter()
+            // Check documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
             Log.d(TAG, "Printer initialized")
             true
         } catch (e: Exception) {
@@ -43,8 +45,10 @@ class PrinterService(private val context: Context) {
      */
     fun checkPrinterStatus(): PrinterStatus {
         return try {
-            // TODO: Check printer status using SUNMI SDK
-            // Example: val status = SunmiPrinterService.getInstance().getPrinterStatus()
+            // TODO: Check printer status using SUNMI printerx SDK
+            // Refer to SUNMI documentation for actual API calls
+            // Example API might check for: paper status, temperature, etc.
+            // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
             PrinterStatus.READY
         } catch (e: Exception) {
             Log.e(TAG, "Failed to check printer status", e)
@@ -108,8 +112,9 @@ class PrinterService(private val context: Context) {
     }
     
     private fun startPrint() {
-        // TODO: Start print job using SUNMI SDK
-        // Example: SunmiPrinterService.getInstance().printerInit()
+        // TODO: Start print job using SUNMI printerx SDK
+        // Refer to SUNMI documentation for actual API calls
+        // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
     }
     
     private fun printHeader(storeName: String, storeAddress: String, storePhone: String) {
@@ -213,13 +218,13 @@ class PrinterService(private val context: Context) {
     }
     
     private fun printLine(text: String = "", bold: Boolean = false, large: Boolean = false) {
-        // TODO: Print line using SUNMI SDK
-        // Example: 
-        // if (bold) SunmiPrinterService.getInstance().setBold(true)
-        // if (large) SunmiPrinterService.getInstance().setFontSize(2)
-        // SunmiPrinterService.getInstance().printText(text + "\n")
-        // if (bold) SunmiPrinterService.getInstance().setBold(false)
-        // if (large) SunmiPrinterService.getInstance().setFontSize(1)
+        // TODO: Print line using SUNMI printerx SDK
+        // Refer to SUNMI documentation for actual API calls
+        // Example API might include:
+        // - Setting font size and style
+        // - Printing text
+        // - Line feeds
+        // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
         Log.d(TAG, "Print: $text")
     }
     
@@ -230,8 +235,9 @@ class PrinterService(private val context: Context) {
     }
     
     private fun cutPaper() {
-        // TODO: Cut paper using SUNMI SDK
-        // Example: SunmiPrinterService.getInstance().cutpaper()
+        // TODO: Cut paper using SUNMI printerx SDK
+        // Refer to SUNMI documentation for actual API calls
+        // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
     }
     
     /**

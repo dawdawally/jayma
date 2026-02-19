@@ -24,6 +24,12 @@ object DatabaseModule {
             "jayma_pos_database"
         )
             .fallbackToDestructiveMigration() // For development - remove in production
+            .setQueryCallback({ sqlQuery, bindArgs ->
+                // Log slow queries in debug builds
+                if (com.jayma.pos.BuildConfig.DEBUG) {
+                    com.jayma.pos.util.Logger.d("RoomQuery", "SQL: $sqlQuery")
+                }
+            }, java.util.concurrent.Executors.newSingleThreadExecutor())
             .build()
     }
     

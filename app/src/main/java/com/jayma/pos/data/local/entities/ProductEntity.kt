@@ -3,7 +3,16 @@ package com.jayma.pos.data.local.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "products")
+@Entity(
+    tableName = "products",
+    indices = [
+        androidx.room.Index(value = ["code"]),
+        androidx.room.Index(value = ["barcode"]),
+        androidx.room.Index(value = ["categoryId"]),
+        androidx.room.Index(value = ["brandId"]),
+        androidx.room.Index(value = ["synced"])
+    ]
+)
 data class ProductEntity(
     @PrimaryKey
     val id: Int,

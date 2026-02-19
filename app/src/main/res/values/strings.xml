@@ -41,4 +41,10 @@
     <string name="scan_barcode">Scan Barcode</string>
     <string name="scanning">Scanning…</string>
     <string name="no_barcode_found">No barcode found. Try again.</string>
+    
+    <!-- Error Messages -->
+    <string name="error_network_timeout">Connection timeout. Please check your internet connection.</string>
+    <string name="error_network_generic">Network error. Please try again.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_unknown">An unexpected error occurred</string>
 </resources>

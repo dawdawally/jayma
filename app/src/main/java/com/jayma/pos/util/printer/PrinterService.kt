@@ -3,8 +3,8 @@ package com.jayma.pos.util.printer
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import com.jayma.pos.data.local.entities.SaleEntity
+import com.jayma.pos.util.Logger
 import com.jayma.pos.data.local.entities.SaleDetailEntity
 import com.jayma.pos.data.local.entities.PaymentEntity
 import com.sunmi.printerx.Printer
@@ -29,6 +29,8 @@ class PrinterService(private val context: Context) {
         private const val LINE_WIDTH = 48 // Characters per line for 80mm paper
     }
     
+    private val logger = Logger
+    
     private var printer: Printer? = null
     private var isInitialized = false
     
@@ -47,16 +49,16 @@ class PrinterService(private val context: Context) {
             // Initialize printer
             printer?.initPrinter(object : PrinterCallback {
                 override fun onException(e: SdkException) {
-                    Log.e(TAG, "Printer initialization exception", e)
+                    logger.e(TAG, "Printer initialization exception", e)
                     isInitialized = false
                 }
             })
             
             isInitialized = true
-            Log.d(TAG, "Printer initialized")
+            logger.d(TAG, "Printer initialized")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize printer", e)
+            logger.e(TAG, "Failed to initialize printer", e)
             isInitialized = false
             false
         }
@@ -82,7 +84,7 @@ class PrinterService(private val context: Context) {
                 else -> PrinterStatus.ERROR
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to check printer status", e)
+            logger.e(TAG, "Failed to check printer status", e)
             PrinterStatus.ERROR
         }
     }
@@ -137,7 +139,7 @@ class PrinterService(private val context: Context) {
             
             PrintResult(true, "Receipt printed successfully")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to print receipt", e)
+            logger.e(TAG, "Failed to print receipt", e)
             PrintResult(false, "Print error: ${e.message}")
         }
     }
@@ -151,7 +153,7 @@ class PrinterService(private val context: Context) {
             // Start a new print job
             printer?.start()
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to start print", e)
+            logger.e(TAG, "Failed to start print", e)
             throw e
         }
     }
@@ -259,7 +261,7 @@ class PrinterService(private val context: Context) {
     private fun printLine(text: String = "", bold: Boolean = false, large: Boolean = false) {
         try {
             if (printer == null || !isInitialized) {
-                Log.w(TAG, "Printer not initialized, skipping print: $text")
+                logger.w(TAG, "Printer not initialized, skipping print: $text")
                 return
             }
             
@@ -285,16 +287,16 @@ class PrinterService(private val context: Context) {
             // Print newline
             printer?.printText("\n")
             
-            Log.d(TAG, "Print: $text")
+            logger.d(TAG, "Print: $text")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to print line: $text", e)
+            logger.e(TAG, "Failed to print line: $text", e)
         }
     }
     
     private fun printCentered(text: String, bold: Boolean = false, large: Boolean = false) {
         try {
             if (printer == null || !isInitialized) {
-                Log.w(TAG, "Printer not initialized, skipping print: $text")
+                logger.w(TAG, "Printer not initialized, skipping print: $text")
                 return
             }
             
@@ -318,16 +320,16 @@ class PrinterService(private val context: Context) {
             // Print newline
             printer?.printText("\n")
             
-            Log.d(TAG, "Print centered: $text")
+            logger.d(TAG, "Print centered: $text")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to print centered: $text", e)
+            logger.e(TAG, "Failed to print centered: $text", e)
         }
     }
     
     private fun cutPaper() {
         try {
             if (printer == null || !isInitialized) {
-                Log.w(TAG, "Printer not initialized, cannot cut paper")
+                logger.w(TAG, "Printer not initialized, cannot cut paper")
                 return
             }
             
@@ -337,9 +339,9 @@ class PrinterService(private val context: Context) {
             // Commit the print job
             printer?.commit()
             
-            Log.d(TAG, "Paper cut and print job committed")
+            logger.d(TAG, "Paper cut and print job committed")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to cut paper", e)
+            logger.e(TAG, "Failed to cut paper", e)
         }
     }
     
@@ -363,7 +365,7 @@ class PrinterService(private val context: Context) {
             
             PrintResult(true, "Test page printed")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to print test page", e)
+            logger.e(TAG, "Failed to print test page", e)
             PrintResult(false, "Print error: ${e.message}")
         }
     }

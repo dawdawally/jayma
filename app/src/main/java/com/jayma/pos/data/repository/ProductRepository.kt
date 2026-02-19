@@ -52,11 +52,14 @@ class ProductRepository @Inject constructor(
         var page = 1
         var hasMore = true
         val productsPerPage = 28 // From API documentation
+        var consecutiveFailures = 0
+        val maxConsecutiveFailures = 3
         
         while (hasMore) {
             val result = syncProducts(warehouseId, page)
             result.fold(
                 onSuccess = { count ->
+                    consecutiveFailures = 0 // Reset failure counter on success
                     totalSynced += count
                     // If we got less than productsPerPage, we're done
                     hasMore = count >= productsPerPage
@@ -65,7 +68,16 @@ class ProductRepository @Inject constructor(
                     }
                 },
                 onFailure = { error ->
-                    return Result.failure(error)
+                    consecutiveFailures++
+                    // Retry up to maxConsecutiveFailures times
+                    if (consecutiveFailures >= maxConsecutiveFailures) {
+                        return Result.failure(error)
+                    }
+                    // Continue to next page on failure (might be temporary network issue)
+                    page++
+                    if (page > 100) { // Safety limit
+                        return Result.failure(Exception("Too many pages, possible infinite loop"))
+                    }
                 }
             )
         }

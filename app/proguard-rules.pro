@@ -61,3 +61,33 @@
   **[] $VALUES;
   public *;
 }
+
+# Keep data classes for API models
+-keep class com.jayma.pos.data.remote.models.** { *; }
+
+# Keep entity classes
+-keep class com.jayma.pos.data.local.entities.** { *; }
+
+# Keep WorkManager workers
+-keep class com.jayma.pos.sync.** { *; }
+
+# Keep Logger utility
+-keep class com.jayma.pos.util.Logger { *; }
+
+# Keep line numbers for crash reports
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# ML Kit
+-keep class com.google.mlkit.** { *; }
+
+# CameraX
+-keep class androidx.camera.** { *; }
+
+# SUNMI Printer SDK
+-keep class com.sunmi.printerx.** { *; }
+-dontwarn com.sunmi.printerx.**
+
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**

@@ -3,7 +3,16 @@ package com.jayma.pos.data.local.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "sales")
+@Entity(
+    tableName = "sales",
+    indices = [
+        androidx.room.Index(value = ["serverId"]),
+        androidx.room.Index(value = ["clientId"]),
+        androidx.room.Index(value = ["warehouseId"]),
+        androidx.room.Index(value = ["synced"]),
+        androidx.room.Index(value = ["createdAt"])
+    ]
+)
 data class SaleEntity(
     @PrimaryKey(autoGenerate = true)
     val localId: Long = 0,
@@ -33,6 +42,10 @@ data class SaleEntity(
             childColumns = ["saleLocalId"],
             onDelete = androidx.room.ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        androidx.room.Index(value = ["saleLocalId"]),
+        androidx.room.Index(value = ["productId"])
     ]
 )
 data class SaleDetailEntity(
@@ -63,6 +76,9 @@ data class SaleDetailEntity(
             childColumns = ["saleLocalId"],
             onDelete = androidx.room.ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        androidx.room.Index(value = ["saleLocalId"])
     ]
 )
 data class PaymentEntity(

@@ -21,7 +21,7 @@ class CheckoutDialogFragment : DialogFragment() {
     private var _binding: DialogCheckoutBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: CartViewModel by viewModels({ requireParentFragment() })
+    private val viewModel: CartViewModel by viewModels({ requireActivity() })
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext())

@@ -4,10 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.jayma.pos.databinding.ActivityPosSetupBinding
 import com.jayma.pos.ui.MainActivity
 import com.jayma.pos.ui.viewmodel.PosSetupViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PosSetupActivity : AppCompatActivity() {
@@ -25,23 +27,25 @@ class PosSetupActivity : AppCompatActivity() {
     }
     
     private fun observeViewModel() {
-        viewModel.uiState.observe(this) { state ->
-            binding.progressMessage.text = state.progressMessage
-            
-            if (state.isLoading) {
-                binding.progressBar.visibility = android.view.View.VISIBLE
-                binding.errorMessage.visibility = android.view.View.GONE
-                binding.retryButton.visibility = android.view.View.GONE
-            } else {
-                binding.progressBar.visibility = android.view.View.GONE
+        lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                binding.progressMessage.text = state.progressMessage
                 
-                if (state.error != null) {
-                    binding.errorMessage.text = state.error
-                    binding.errorMessage.visibility = android.view.View.VISIBLE
-                    binding.retryButton.visibility = android.view.View.VISIBLE
-                } else if (state.setupComplete) {
-                    // Navigate to main POS screen
-                    navigateToMain()
+                if (state.isLoading) {
+                    binding.progressBar.visibility = android.view.View.VISIBLE
+                    binding.errorMessage.visibility = android.view.View.GONE
+                    binding.retryButton.visibility = android.view.View.GONE
+                } else {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    
+                    if (state.error != null) {
+                        binding.errorMessage.text = state.error
+                        binding.errorMessage.visibility = android.view.View.VISIBLE
+                        binding.retryButton.visibility = android.view.View.VISIBLE
+                    } else if (state.setupComplete) {
+                        // Navigate to main POS screen
+                        navigateToMain()
+                    }
                 }
             }
         }

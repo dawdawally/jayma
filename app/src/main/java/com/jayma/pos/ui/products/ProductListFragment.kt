@@ -100,8 +100,9 @@ class ProductListFragment : Fragment() {
         binding.scanButton.setOnClickListener {
             // Open barcode scanner fragment
             val scannerFragment = BarcodeScannerFragment()
-            parentFragmentManager.beginTransaction()
-                .replace(android.R.id.content, scannerFragment)
+            // Replace in the fragment container (same container used by MainActivity)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(com.jayma.pos.R.id.fragmentContainer, scannerFragment)
                 .addToBackStack("barcode_scanner")
                 .commit()
         }

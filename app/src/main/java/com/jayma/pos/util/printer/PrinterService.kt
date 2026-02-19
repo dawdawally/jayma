@@ -7,14 +7,20 @@ import android.util.Log
 import com.jayma.pos.data.local.entities.SaleEntity
 import com.jayma.pos.data.local.entities.SaleDetailEntity
 import com.jayma.pos.data.local.entities.PaymentEntity
+import com.sunmi.printerx.Printer
+import com.sunmi.printerx.PrinterCallback
+import com.sunmi.printerx.SdkException
+import com.sunmi.printerx.enums.AlignType
+import com.sunmi.printerx.enums.FontType
+import com.sunmi.printerx.enums.PaperType
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
  * Printer Service for SUNMI POS devices
  * 
- * Note: This is a wrapper around SUNMI Printer SDK
- * Replace the actual SDK calls with your SUNMI SDK implementation
+ * Uses SUNMI Printer SDK (com.sunmi:printerx:1.0.17)
+ * Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
  */
 class PrinterService(private val context: Context) {
     
@@ -23,19 +29,35 @@ class PrinterService(private val context: Context) {
         private const val LINE_WIDTH = 48 // Characters per line for 80mm paper
     }
     
+    private var printer: Printer? = null
+    private var isInitialized = false
+    
     /**
      * Initialize printer connection
      */
     fun initialize(): Boolean {
         return try {
-            // TODO: Initialize SUNMI printer SDK using printerx library
-            // Refer to SUNMI documentation for actual API calls
-            // Example API might be: PrinterService.getInstance().initPrinter()
-            // Check documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
+            if (isInitialized && printer != null) {
+                return true
+            }
+            
+            // Get printer instance for built-in printer (PaperType.RECEIPT)
+            printer = Printer.getInstance(context, PaperType.RECEIPT)
+            
+            // Initialize printer
+            printer?.initPrinter(object : PrinterCallback {
+                override fun onException(e: SdkException) {
+                    Log.e(TAG, "Printer initialization exception", e)
+                    isInitialized = false
+                }
+            })
+            
+            isInitialized = true
             Log.d(TAG, "Printer initialized")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize printer", e)
+            isInitialized = false
             false
         }
     }
@@ -45,11 +67,20 @@ class PrinterService(private val context: Context) {
      */
     fun checkPrinterStatus(): PrinterStatus {
         return try {
-            // TODO: Check printer status using SUNMI printerx SDK
-            // Refer to SUNMI documentation for actual API calls
-            // Example API might check for: paper status, temperature, etc.
-            // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
-            PrinterStatus.READY
+            if (!isInitialized || printer == null) {
+                return PrinterStatus.ERROR
+            }
+            
+            // Check printer status
+            val status = printer?.getPrinterStatus()
+            
+            when (status) {
+                null -> PrinterStatus.ERROR
+                0 -> PrinterStatus.READY // Normal status
+                1 -> PrinterStatus.OUT_OF_PAPER
+                2 -> PrinterStatus.OVERHEATED
+                else -> PrinterStatus.ERROR
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to check printer status", e)
             PrinterStatus.ERROR
@@ -112,9 +143,17 @@ class PrinterService(private val context: Context) {
     }
     
     private fun startPrint() {
-        // TODO: Start print job using SUNMI printerx SDK
-        // Refer to SUNMI documentation for actual API calls
-        // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
+        try {
+            if (printer == null || !isInitialized) {
+                throw IllegalStateException("Printer not initialized")
+            }
+            
+            // Start a new print job
+            printer?.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start print", e)
+            throw e
+        }
     }
     
     private fun printHeader(storeName: String, storeAddress: String, storePhone: String) {
@@ -218,26 +257,90 @@ class PrinterService(private val context: Context) {
     }
     
     private fun printLine(text: String = "", bold: Boolean = false, large: Boolean = false) {
-        // TODO: Print line using SUNMI printerx SDK
-        // Refer to SUNMI documentation for actual API calls
-        // Example API might include:
-        // - Setting font size and style
-        // - Printing text
-        // - Line feeds
-        // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
-        Log.d(TAG, "Print: $text")
+        try {
+            if (printer == null || !isInitialized) {
+                Log.w(TAG, "Printer not initialized, skipping print: $text")
+                return
+            }
+            
+            // Set alignment to left
+            printer?.setAlign(AlignType.LEFT)
+            
+            // Set font style
+            if (bold && large) {
+                printer?.setFontSize(FontType.BOLD_LARGE)
+            } else if (bold) {
+                printer?.setFontSize(FontType.BOLD)
+            } else if (large) {
+                printer?.setFontSize(FontType.LARGE)
+            } else {
+                printer?.setFontSize(FontType.NORMAL)
+            }
+            
+            // Print text
+            if (text.isNotEmpty()) {
+                printer?.printText(text)
+            }
+            
+            // Print newline
+            printer?.printText("\n")
+            
+            Log.d(TAG, "Print: $text")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to print line: $text", e)
+        }
     }
     
     private fun printCentered(text: String, bold: Boolean = false, large: Boolean = false) {
-        val padding = (LINE_WIDTH - text.length) / 2
-        val centeredText = " ".repeat(padding.coerceAtLeast(0)) + text
-        printLine(centeredText, bold, large)
+        try {
+            if (printer == null || !isInitialized) {
+                Log.w(TAG, "Printer not initialized, skipping print: $text")
+                return
+            }
+            
+            // Set alignment to center
+            printer?.setAlign(AlignType.CENTER)
+            
+            // Set font style
+            if (bold && large) {
+                printer?.setFontSize(FontType.BOLD_LARGE)
+            } else if (bold) {
+                printer?.setFontSize(FontType.BOLD)
+            } else if (large) {
+                printer?.setFontSize(FontType.LARGE)
+            } else {
+                printer?.setFontSize(FontType.NORMAL)
+            }
+            
+            // Print text
+            printer?.printText(text)
+            
+            // Print newline
+            printer?.printText("\n")
+            
+            Log.d(TAG, "Print centered: $text")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to print centered: $text", e)
+        }
     }
     
     private fun cutPaper() {
-        // TODO: Cut paper using SUNMI printerx SDK
-        // Refer to SUNMI documentation for actual API calls
-        // Documentation: https://developer.sunmi.com/docs/en-US/cdixeghjk491/xdzceghjk502
+        try {
+            if (printer == null || !isInitialized) {
+                Log.w(TAG, "Printer not initialized, cannot cut paper")
+                return
+            }
+            
+            // Cut paper (partial cut)
+            printer?.cutPaper()
+            
+            // Commit the print job
+            printer?.commit()
+            
+            Log.d(TAG, "Paper cut and print job committed")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to cut paper", e)
+        }
     }
     
     /**

@@ -51,8 +51,9 @@ class ProductListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         productAdapter = ProductAdapter { product ->
-            // Navigate to product details (will be implemented)
-            Toast.makeText(context, "Product: ${product.name}", Toast.LENGTH_SHORT).show()
+            // Show product details in a toast for now
+            // Detail screen navigation will be added later
+            Toast.makeText(context, "${product.name}\nPrice: $${product.netPrice}", Toast.LENGTH_SHORT).show()
         }
 
         binding.productsRecyclerView.apply {

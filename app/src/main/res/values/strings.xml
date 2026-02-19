@@ -36,4 +36,9 @@
     <!-- Receipt -->
     <string name="receipt">Receipt</string>
     <string name="print_receipt">Print Receipt</string>
+    
+    <!-- Barcode Scanner -->
+    <string name="scan_barcode">Scan Barcode</string>
+    <string name="scanning">Scanning…</string>
+    <string name="no_barcode_found">No barcode found. Try again.</string>
 </resources>

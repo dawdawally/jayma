@@ -13,6 +13,8 @@ import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.databinding.FragmentProductListBinding
 import com.jayma.pos.ui.adapter.ProductAdapter
 import com.jayma.pos.ui.cart.CartFragment
+import com.jayma.pos.ui.scanner.BarcodeScannerFragment
+import com.jayma.pos.ui.viewmodel.BarcodeScannerViewModel
 import com.jayma.pos.ui.viewmodel.CartViewModel
 import com.jayma.pos.ui.viewmodel.ProductViewModel
 import com.jayma.pos.util.SharedPreferencesHelper
@@ -28,6 +30,7 @@ class ProductListFragment : Fragment() {
 
     private val productViewModel: ProductViewModel by viewModels()
     private val cartViewModel: CartViewModel by viewModels({ requireActivity() })
+    private val barcodeScannerViewModel: BarcodeScannerViewModel by viewModels()
     
     @Inject
     lateinit var sharedPreferences: SharedPreferencesHelper
@@ -49,7 +52,9 @@ class ProductListFragment : Fragment() {
         setupRecyclerView()
         setupSearch()
         setupPullToRefresh()
+        setupBarcodeScanner()
         observeViewModel()
+        observeBarcodeScanner()
     }
 
     private fun setupRecyclerView() {
@@ -87,6 +92,35 @@ class ProductListFragment : Fragment() {
             } else {
                 binding.swipeRefreshLayout.isRefreshing = false
                 Toast.makeText(context, "No warehouse selected", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun setupBarcodeScanner() {
+        binding.scanButton.setOnClickListener {
+            // Open barcode scanner fragment
+            val scannerFragment = BarcodeScannerFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(android.R.id.content, scannerFragment)
+                .addToBackStack("barcode_scanner")
+                .commit()
+        }
+    }
+    
+    private fun observeBarcodeScanner() {
+        lifecycleScope.launch {
+            barcodeScannerViewModel.foundProduct.collect { product ->
+                product?.let {
+                    // Add product to cart when found via barcode scan
+                    cartViewModel.addToCart(it, 1.0)
+                    Toast.makeText(
+                        context,
+                        "${it.name} added to cart",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // Reset after handling
+                    barcodeScannerViewModel.reset()
+                }
             }
         }
     }

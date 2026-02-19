@@ -1,9 +1,10 @@
 package com.jayma.pos.data.repository
 
 import com.jayma.pos.data.local.dao.ClientDao
-import com.jayma.pos.data.local.entities.ClientEntity
+import com.jayma.pos.data.local.entities.*
 import com.jayma.pos.data.remote.models.PosDataResponse
 import com.jayma.pos.data.remote.services.ApiService
+import com.jayma.pos.util.SharedPreferencesHelper
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,7 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class PosDataRepository @Inject constructor(
     private val apiService: ApiService,
-    private val clientDao: ClientDao
+    private val clientDao: ClientDao,
+    private val sharedPreferences: SharedPreferencesHelper
 ) {
     
     suspend fun fetchPosData(): Result<PosDataResponse> {
@@ -29,6 +31,10 @@ class PosDataRepository @Inject constructor(
                     )
                 }
                 clientDao.insertClients(clients)
+                
+                // Save default warehouse and client
+                sharedPreferences.saveDefaultWarehouse(posData.defaultWarehouse)
+                sharedPreferences.saveDefaultClient(posData.defaultClient)
                 
                 Result.success(posData)
             } else {

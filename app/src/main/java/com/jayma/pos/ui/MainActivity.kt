@@ -14,5 +14,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        // TODO: Setup main POS screen UI
+        // This will be implemented in Phase 4 (Product Management)
     }
 }

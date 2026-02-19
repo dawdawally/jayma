@@ -8,10 +8,13 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.jayma.pos.data.repository.SaleRepository
 import com.jayma.pos.databinding.FragmentCartBinding
 import com.jayma.pos.ui.viewmodel.CartViewModel
+import com.jayma.pos.util.printer.PrinterService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CartFragment : Fragment() {
@@ -21,6 +24,9 @@ class CartFragment : Fragment() {
 
     private val viewModel: CartViewModel by viewModels({ requireActivity() })
     private lateinit var cartAdapter: CartAdapter
+    
+    @Inject
+    lateinit var saleRepository: SaleRepository
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,8 +60,6 @@ class CartFragment : Fragment() {
 
     private fun setupButtons() {
         binding.checkoutButton.setOnClickListener {
-            // Navigate to checkout screen
-            // For now, show checkout dialog or navigate to checkout fragment
             navigateToCheckout()
         }
 
@@ -65,8 +69,6 @@ class CartFragment : Fragment() {
     }
 
     private fun navigateToCheckout() {
-        // TODO: Navigate to checkout fragment when implemented
-        // For now, show checkout dialog
         CheckoutDialogFragment.newInstance().show(
             childFragmentManager,
             "CheckoutDialog"

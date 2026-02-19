@@ -104,6 +104,11 @@ dependencies {
     // Security
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     
+    // SUNMI Printer SDK
+    implementation(files("libs/sunmiprinterlibrary.jar")) // Add SUNMI SDK JAR to libs folder
+    // Alternative: If using Maven repository
+    // implementation("com.sunmi:printerlibrary:1.0.0")
+    
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.7.0")

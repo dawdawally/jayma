@@ -11,9 +11,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jayma.pos.databinding.DialogCheckoutBinding
+import com.jayma.pos.data.repository.SaleRepository
 import com.jayma.pos.ui.viewmodel.CartViewModel
+import com.jayma.pos.util.printer.PrinterService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CheckoutDialogFragment : DialogFragment() {
@@ -22,6 +25,9 @@ class CheckoutDialogFragment : DialogFragment() {
     private val binding get() = _binding!!
 
     private val viewModel: CartViewModel by viewModels({ requireActivity() })
+    
+    @Inject
+    lateinit var saleRepository: SaleRepository
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext())
@@ -83,7 +89,8 @@ class CheckoutDialogFragment : DialogFragment() {
 
                 // Handle checkout result
                 if (!state.isLoading && state.cartItems.isEmpty() && state.error == null) {
-                    // Checkout successful
+                    // Checkout successful - print receipt
+                    printReceiptAfterCheckout()
                     Toast.makeText(context, "Sale completed successfully!", Toast.LENGTH_SHORT).show()
                     dismiss()
                 }
@@ -101,6 +108,44 @@ class CheckoutDialogFragment : DialogFragment() {
         _binding = null
     }
 
+    private fun printReceiptAfterCheckout() {
+        // Get the last created sale and print receipt
+        lifecycleScope.launch {
+            try {
+                // Get unsynced sales (the one we just created)
+                val unsyncedSales = saleRepository.getUnsyncedSales()
+                if (unsyncedSales.isNotEmpty()) {
+                    val latestSale = unsyncedSales.maxByOrNull { it.createdAt }
+                    latestSale?.let { sale ->
+                        val saleDetails = saleRepository.getSaleDetails(sale.localId)
+                        val payments = saleRepository.getPayments(sale.localId)
+                        
+                        val printerService = PrinterService(requireContext())
+                        val result = printerService.printReceipt(
+                            sale = sale,
+                            saleDetails = saleDetails,
+                            payments = payments
+                        )
+                        
+                        if (!result.success) {
+                            Toast.makeText(
+                                context,
+                                "Receipt print failed: ${result.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    context,
+                    "Failed to print receipt: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+    
     companion object {
         fun newInstance() = CheckoutDialogFragment()
     }

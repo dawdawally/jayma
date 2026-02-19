@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.databinding.FragmentProductListBinding
 import com.jayma.pos.ui.adapter.ProductAdapter
+import com.jayma.pos.ui.cart.CartFragment
+import com.jayma.pos.ui.viewmodel.CartViewModel
 import com.jayma.pos.ui.viewmodel.ProductViewModel
 import com.jayma.pos.util.SharedPreferencesHelper
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,7 +26,8 @@ class ProductListFragment : Fragment() {
     private var _binding: FragmentProductListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ProductViewModel by viewModels()
+    private val productViewModel: ProductViewModel by viewModels()
+    private val cartViewModel: CartViewModel by viewModels({ requireActivity() })
     
     @Inject
     lateinit var sharedPreferences: SharedPreferencesHelper
@@ -51,9 +54,9 @@ class ProductListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         productAdapter = ProductAdapter { product ->
-            // Show product details in a toast for now
-            // Detail screen navigation will be added later
-            Toast.makeText(context, "${product.name}\nPrice: $${product.netPrice}", Toast.LENGTH_SHORT).show()
+            // Add product to cart
+            cartViewModel.addToCart(product, 1.0)
+            Toast.makeText(context, "${product.name} added to cart", Toast.LENGTH_SHORT).show()
         }
 
         binding.productsRecyclerView.apply {
@@ -80,7 +83,7 @@ class ProductListFragment : Fragment() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             val warehouseId = sharedPreferences.getDefaultWarehouse()
             if (warehouseId != null) {
-                viewModel.syncProducts(warehouseId)
+                productViewModel.syncProducts(warehouseId)
             } else {
                 binding.swipeRefreshLayout.isRefreshing = false
                 Toast.makeText(context, "No warehouse selected", Toast.LENGTH_SHORT).show()
@@ -90,7 +93,7 @@ class ProductListFragment : Fragment() {
 
     private fun observeViewModel() {
         lifecycleScope.launch {
-            viewModel.uiState.collect { state ->
+            productViewModel.uiState.collect { state ->
                 productAdapter.submitList(state.products)
 
                 // Handle loading state

@@ -28,6 +28,10 @@
     <string name="cart">Cart</string>
     <string name="checkout">Checkout</string>
     <string name="total">Total</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="tax">Tax</string>
+    <string name="discount">Discount</string>
+    <string name="shipping">Shipping</string>
     
     <!-- Receipt -->
     <string name="receipt">Receipt</string>

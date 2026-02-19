@@ -2,7 +2,9 @@ package com.jayma.pos.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jayma.pos.databinding.ActivityMainBinding
+import com.jayma.pos.ui.cart.CartFragment
 import com.jayma.pos.ui.products.ProductListFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,11 +18,34 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // Load product list fragment
+        setupBottomNavigation()
+        
+        // Load product list fragment by default
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(binding.fragmentContainer.id, ProductListFragment())
                 .commit()
         }
     }
+    
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                com.jayma.pos.R.id.nav_products -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(binding.fragmentContainer.id, ProductListFragment())
+                        .commit()
+                    true
+                }
+                com.jayma.pos.R.id.nav_cart -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(binding.fragmentContainer.id, CartFragment())
+                        .commit()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
 }
+

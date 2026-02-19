@@ -1,0 +1,119 @@
+package com.jayma.pos.ui.products
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import com.jayma.pos.data.local.entities.ProductEntity
+import com.jayma.pos.databinding.FragmentProductListBinding
+import com.jayma.pos.ui.adapter.ProductAdapter
+import com.jayma.pos.ui.viewmodel.ProductViewModel
+import com.jayma.pos.util.SharedPreferencesHelper
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class ProductListFragment : Fragment() {
+
+    private var _binding: FragmentProductListBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: ProductViewModel by viewModels()
+    
+    @Inject
+    lateinit var sharedPreferences: SharedPreferencesHelper
+
+    private lateinit var productAdapter: ProductAdapter
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentProductListBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+        setupSearch()
+        setupPullToRefresh()
+        observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        productAdapter = ProductAdapter { product ->
+            // Navigate to product details (will be implemented)
+            Toast.makeText(context, "Product: ${product.name}", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.productsRecyclerView.apply {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = productAdapter
+        }
+    }
+
+    private fun setupSearch() {
+        binding.searchView.setOnQueryTextListener(object :
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.searchProducts(newText ?: "")
+                return true
+            }
+        })
+    }
+
+    private fun setupPullToRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            val warehouseId = sharedPreferences.getDefaultWarehouse()
+            if (warehouseId != null) {
+                viewModel.syncProducts(warehouseId)
+            } else {
+                binding.swipeRefreshLayout.isRefreshing = false
+                Toast.makeText(context, "No warehouse selected", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                productAdapter.submitList(state.products)
+
+                // Handle loading state
+                binding.swipeRefreshLayout.isRefreshing = state.isLoading
+
+                // Handle error state
+                state.error?.let { error ->
+                    Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                }
+
+                // Show empty state
+                if (state.products.isEmpty() && !state.isLoading) {
+                    binding.emptyState.visibility = View.VISIBLE
+                    binding.productsRecyclerView.visibility = View.GONE
+                } else {
+                    binding.emptyState.visibility = View.GONE
+                    binding.productsRecyclerView.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

@@ -3,6 +3,7 @@ package com.jayma.pos.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.jayma.pos.databinding.ActivityMainBinding
+import com.jayma.pos.ui.products.ProductListFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,7 +16,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // TODO: Setup main POS screen UI
-        // This will be implemented in Phase 4 (Product Management)
+        // Load product list fragment
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(binding.fragmentContainer.id, ProductListFragment())
+                .commit()
+        }
     }
 }

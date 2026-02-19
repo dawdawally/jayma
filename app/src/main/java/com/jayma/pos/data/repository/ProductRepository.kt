@@ -51,15 +51,18 @@ class ProductRepository @Inject constructor(
         var totalSynced = 0
         var page = 1
         var hasMore = true
+        val productsPerPage = 28 // From API documentation
         
         while (hasMore) {
             val result = syncProducts(warehouseId, page)
             result.fold(
                 onSuccess = { count ->
                     totalSynced += count
-                    // If we got less than 28 products, we're done (28 is products_per_page)
-                    hasMore = count >= 28
-                    page++
+                    // If we got less than productsPerPage, we're done
+                    hasMore = count >= productsPerPage
+                    if (hasMore) {
+                        page++
+                    }
                 },
                 onFailure = { error ->
                     return Result.failure(error)

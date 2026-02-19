@@ -6,6 +6,7 @@ import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.data.model.CartItem
 import com.jayma.pos.data.repository.PosDataRepository
 import com.jayma.pos.data.repository.SaleRepository
+import com.jayma.pos.sync.SyncManager
 import com.jayma.pos.util.SharedPreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +33,8 @@ data class CartUiState(
 class CartViewModel @Inject constructor(
     private val saleRepository: SaleRepository,
     private val posDataRepository: PosDataRepository,
-    private val sharedPreferences: SharedPreferencesHelper
+    private val sharedPreferences: SharedPreferencesHelper,
+    private val syncManager: SyncManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CartUiState())
@@ -198,8 +200,10 @@ class CartViewModel @Inject constructor(
                 // Save sale locally
                 val saleLocalId = saleRepository.createSale(sale, saleDetails, payments)
 
-                // Try to sync if online (will be handled by background sync in Phase 7)
-                // For now, just mark as created
+                // Trigger immediate sale upload if online
+                // This ensures sales are uploaded as soon as possible (within seconds)
+                // Background sync (every 5 minutes) will also handle it as a backup
+                syncManager.triggerSaleUpload()
                 
                 // Clear cart on success
                 clearCart()

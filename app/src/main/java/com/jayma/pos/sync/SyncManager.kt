@@ -29,8 +29,12 @@ class SyncManager @Inject constructor(
         private const val SALE_UPLOAD_WORK_NAME = "sale_upload_work"
         
         // Sync intervals
-        private const val PRODUCT_SYNC_INTERVAL_HOURS = 6L // Sync products every 6 hours
-        private const val SALE_UPLOAD_INTERVAL_MINUTES = 15L // Try uploading sales every 15 minutes
+        // Products: Sync every 1 hour to keep prices, stock, and new products up-to-date
+        private const val PRODUCT_SYNC_INTERVAL_HOURS = 1L
+        
+        // Sales: Upload every 5 minutes to ensure offline sales are synced quickly
+        // This ensures sales are uploaded within 5 minutes of being created offline
+        private const val SALE_UPLOAD_INTERVAL_MINUTES = 5L
     }
     
     private val _syncStatus = MutableStateFlow<SyncStatus>(SyncStatus.Idle)

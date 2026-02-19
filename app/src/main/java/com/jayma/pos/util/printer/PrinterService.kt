@@ -82,6 +82,9 @@ class PrinterService(private val context: Context) {
             // Print sale info
             printSaleInfo(sale)
             
+            // Store sale details for use in printTotals
+            this.saleDetails = saleDetails
+            
             // Print items
             printItems(saleDetails)
             

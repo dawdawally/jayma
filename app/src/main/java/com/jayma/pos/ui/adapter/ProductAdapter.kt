@@ -23,46 +23,50 @@ class ProductAdapter(
     private var cartItems: List<CartItem> = emptyList()
 
     fun updateCartItems(newCartItems: List<CartItem>) {
-        // Only update if cart items actually changed
-        if (cartItems == newCartItems) {
-            return
-        }
-        
         val oldCartItems = cartItems.toList()
         cartItems = newCartItems
         
-        // Find which product IDs changed
-        val oldProductIds = oldCartItems.map { it.product.id }.toSet()
-        val newProductIds = newCartItems.map { it.product.id }.toSet()
-        val allProductIds = oldProductIds + newProductIds
+        // Find which product IDs changed quantity or were added/removed
+        val changedProductIds = mutableSetOf<Int>()
         
-        val changedProductIds = allProductIds.filter { productId ->
-            val oldItem = oldCartItems.find { it.product.id == productId }
-            val newItem = newCartItems.find { it.product.id == productId }
-            oldItem?.quantity != newItem?.quantity || (oldItem == null) != (newItem == null)
-        }
-        
-        // Notify only items that changed
-        if (changedProductIds.isEmpty()) {
-            return
-        }
-        
-        // Find positions of changed items and notify them
-        val changedPositions = mutableListOf<Int>()
+        // Check all products in current list
         for (i in 0 until itemCount) {
             try {
                 val product = getItem(i)
-                if (changedProductIds.contains(product.id)) {
-                    changedPositions.add(i)
+                val oldItem = oldCartItems.find { it.product.id == product.id }
+                val newItem = newCartItems.find { it.product.id == product.id }
+                
+                // If quantity changed or item was added/removed from cart
+                if (oldItem?.quantity != newItem?.quantity || (oldItem == null) != (newItem == null)) {
+                    changedProductIds.add(product.id)
                 }
             } catch (e: Exception) {
                 // Continue if item not available
             }
         }
         
-        // Notify changed positions
-        changedPositions.forEach { position ->
-            notifyItemChanged(position)
+        // Also check for products that were in cart but might not be in current product list
+        val allProductIds = (oldCartItems.map { it.product.id } + newCartItems.map { it.product.id }).toSet()
+        for (productId in allProductIds) {
+            val oldItem = oldCartItems.find { it.product.id == productId }
+            val newItem = newCartItems.find { it.product.id == productId }
+            if (oldItem?.quantity != newItem?.quantity || (oldItem == null) != (newItem == null)) {
+                changedProductIds.add(productId)
+            }
+        }
+        
+        // Notify all changed positions immediately
+        if (changedProductIds.isNotEmpty()) {
+            for (i in 0 until itemCount) {
+                try {
+                    val product = getItem(i)
+                    if (changedProductIds.contains(product.id)) {
+                        notifyItemChanged(i)
+                    }
+                } catch (e: Exception) {
+                    // Continue if item not available
+                }
+            }
         }
     }
 
@@ -137,18 +141,21 @@ class ProductAdapter(
                     val currentQuantity = cartItem.quantity.toInt()
                     quantityText.text = currentQuantity.toString()
                     
-                    // Clear previous listeners
+                    // Clear previous listeners to avoid duplicates
                     decreaseButton.setOnClickListener(null)
                     increaseButton.setOnClickListener(null)
                     
+                    // Store product ID for listeners
+                    val productId = product.id
+                    
                     // Set new listeners
                     decreaseButton.setOnClickListener {
-                        onDecreaseQuantity(product.id)
+                        onDecreaseQuantity(productId)
                     }
                     
                     increaseButton.setOnClickListener {
                         if (cartItem.quantity < product.qteSale) {
-                            onIncreaseQuantity(product.id)
+                            onIncreaseQuantity(productId)
                         }
                     }
                     

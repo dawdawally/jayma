@@ -125,8 +125,18 @@ class CartViewModel @Inject constructor(
 
     private fun updateCartState() {
         val subtotal = cartItems.sumOf { it.subtotal }
+        
+        // Create a new list with new CartItem instances to ensure StateFlow detects the change
+        val newCartItems = cartItems.map { 
+            CartItem(
+                product = it.product,
+                quantity = it.quantity,
+                unitPrice = it.unitPrice
+            )
+        }
+        
         _uiState.value = _uiState.value.copy(
-            cartItems = cartItems.toList(),
+            cartItems = newCartItems,
             subtotal = subtotal
         )
         calculateTotal()

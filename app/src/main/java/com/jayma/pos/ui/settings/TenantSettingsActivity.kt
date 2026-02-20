@@ -15,6 +15,7 @@ import com.jayma.pos.sync.SyncManager
 import com.jayma.pos.ui.setup.PosSetupActivity
 import com.jayma.pos.util.SharedPreferencesHelper
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -181,14 +182,30 @@ class TenantSettingsActivity : AppCompatActivity() {
                 syncManager.triggerProductSync()
                 syncManager.triggerSaleUpload()
                 
-                Toast.makeText(this@TenantSettingsActivity, "Sync started. Products and sales will be updated shortly.", Toast.LENGTH_LONG).show()
+                // Show initial feedback
+                Toast.makeText(
+                    this@TenantSettingsActivity,
+                    "Sync started. Products and sales will be updated shortly.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 
-                // Re-enable button after a delay
-                kotlinx.coroutines.delay(2000)
+                // Wait a bit and then show completion message
+                delay(2000)
+                
+                Toast.makeText(
+                    this@TenantSettingsActivity,
+                    "Sync operations have been queued. Data will be synchronized in the background.",
+                    Toast.LENGTH_LONG
+                ).show()
+                
                 binding.syncButton.isEnabled = true
                 binding.syncButton.text = "Sync Data Now"
             } catch (e: Exception) {
-                Toast.makeText(this@TenantSettingsActivity, "Sync failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@TenantSettingsActivity,
+                    "Sync failed to start: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
                 binding.syncButton.isEnabled = true
                 binding.syncButton.text = "Sync Data Now"
             }

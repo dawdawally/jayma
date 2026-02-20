@@ -20,7 +20,7 @@
     
     <!-- Products -->
     <string name="products">Products</string>
-    <string name="search_products">Search products</string>
+    <string name="search_products">Search product by name/barcode</string>
     <string name="no_products">No products found</string>
     
     <!-- Sales -->

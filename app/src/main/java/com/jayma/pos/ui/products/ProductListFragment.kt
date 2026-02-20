@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.get
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.databinding.FragmentProductListBinding
@@ -78,7 +80,7 @@ class ProductListFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.searchProducts(newText ?: "")
+                productViewModel.searchProducts(newText ?: "")
                 return true
             }
         })

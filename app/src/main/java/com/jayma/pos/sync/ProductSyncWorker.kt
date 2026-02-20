@@ -29,7 +29,7 @@ class ProductSyncWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             val warehouseId = sharedPreferencesHelper.getDefaultWarehouse()
-                ?: return Result.failure(workDataOf("error" to "No warehouse configured"))
+                ?: return@withContext Result.failure(workDataOf("error" to "No warehouse configured"))
 
             // Mark sync as in progress
             syncStatusDao.setSyncInProgress(true)

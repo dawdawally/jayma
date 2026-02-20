@@ -30,7 +30,7 @@ class SaleUploadWorker @AssistedInject constructor(
             val unsyncedSales = saleRepository.getUnsyncedSales()
 
             if (unsyncedSales.isEmpty()) {
-                return Result.success(workDataOf("message" to "No unsynced sales"))
+                return@withContext Result.success(workDataOf("message" to "No unsynced sales"))
             }
 
             var successCount = 0

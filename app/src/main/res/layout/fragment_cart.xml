@@ -43,7 +43,7 @@
             android:layout_marginTop="16dp"
             android:text="Cart is empty"
             android:textSize="18sp"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textColor="?android:attr/textColorSecondary" />
     </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView
@@ -97,7 +97,7 @@
                     android:layout_weight="1"
                     android:text="Tax:"
                     android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
                     android:id="@+id/taxValue"
@@ -120,7 +120,7 @@
                     android:layout_weight="1"
                     android:text="Discount:"
                     android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
                     android:id="@+id/discountValue"
@@ -143,7 +143,7 @@
                     android:layout_weight="1"
                     android:text="Shipping:"
                     android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
                     android:id="@+id/shippingValue"
@@ -159,7 +159,7 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:background="?attr/colorOutline" />
+                android:background="?android:attr/listDivider" />
 
             <LinearLayout
                 android:layout_width="match_parent"

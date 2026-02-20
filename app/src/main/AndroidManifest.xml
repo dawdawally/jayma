@@ -23,7 +23,7 @@
         <activity
             android:name=".ui.setup.PosSetupActivity"
             android:exported="true"
-            android:theme="@style/Theme.JaymaPOS"
+            android:theme="@style/Theme.Splash"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,6 +36,13 @@
             android:exported="false"
             android:theme="@style/Theme.JaymaPOS"
             android:screenOrientation="portrait" />
+        
+        <activity
+            android:name=".ui.settings.TenantSettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.JaymaPOS"
+            android:screenOrientation="portrait"
+            android:label="Tenant Settings" />
     </application>
 
 </manifest>

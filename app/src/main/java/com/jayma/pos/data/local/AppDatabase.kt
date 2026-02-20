@@ -2,8 +2,6 @@ package com.jayma.pos.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.jayma.pos.data.local.converters.Converters
 import com.jayma.pos.data.local.dao.*
 import com.jayma.pos.data.local.entities.*
 
@@ -25,7 +23,6 @@ import com.jayma.pos.data.local.entities.*
     version = 1,
     exportSchema = true
 )
-@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     
     abstract fun productDao(): ProductDao

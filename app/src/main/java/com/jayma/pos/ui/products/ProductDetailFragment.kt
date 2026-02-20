@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.jayma.pos.data.remote.ApiConfig
 import com.jayma.pos.databinding.FragmentProductDetailBinding
@@ -22,7 +21,6 @@ class ProductDetailFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ProductViewModel by viewModels()
-    private val args: ProductDetailFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,8 +34,10 @@ class ProductDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val productId = args.productId
-        loadProductDetails(productId)
+        val productId = arguments?.getInt("productId") ?: 0
+        if (productId > 0) {
+            loadProductDetails(productId)
+        }
     }
 
     private fun loadProductDetails(productId: Int) {

@@ -20,14 +20,30 @@ class PosDataRepository @Inject constructor(
         return try {
             val response = apiService.getPosData()
             if (response.isSuccessful && response.body() != null) {
-                val posData = response.body()!!
+                var posData = response.body()!!
                 
-                // Validate defaultWarehouse and defaultClient
-                if (posData.defaultWarehouse <= 0) {
-                    return Result.failure(Exception("Invalid default warehouse ID: ${posData.defaultWarehouse}. Please configure a default warehouse in the system."))
+                // Handle invalid defaultWarehouse - fallback to first warehouse if available
+                var defaultWarehouse = posData.defaultWarehouse
+                if (defaultWarehouse <= 0) {
+                    if (posData.warehouses.isNotEmpty()) {
+                        defaultWarehouse = posData.warehouses.first().id
+                        // Create a new PosDataResponse with corrected defaultWarehouse
+                        posData = posData.copy(defaultWarehouse = defaultWarehouse)
+                    } else {
+                        return Result.failure(Exception("No warehouses available. Please configure at least one warehouse in the system."))
+                    }
                 }
-                if (posData.defaultClient <= 0) {
-                    return Result.failure(Exception("Invalid default client ID: ${posData.defaultClient}. Please configure a default client in the system."))
+                
+                // Handle invalid defaultClient - fallback to first client if available
+                var defaultClient = posData.defaultClient
+                if (defaultClient <= 0) {
+                    if (posData.clients.isNotEmpty()) {
+                        defaultClient = posData.clients.first().id
+                        // Create a new PosDataResponse with corrected defaultClient
+                        posData = posData.copy(defaultClient = defaultClient)
+                    } else {
+                        return Result.failure(Exception("No clients available. Please configure at least one client in the system."))
+                    }
                 }
                 
                 // Cache clients locally

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import com.google.android.gms.tasks.Tasks
 import kotlinx.coroutines.tasks.await
 
 /**

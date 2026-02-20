@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.jayma.pos.data.repository.SaleRepository
 import com.jayma.pos.databinding.FragmentCartBinding
+import com.jayma.pos.ui.adapter.CartAdapter
 import com.jayma.pos.ui.viewmodel.CartViewModel
 import com.jayma.pos.util.printer.PrinterService
 import dagger.hilt.android.AndroidEntryPoint

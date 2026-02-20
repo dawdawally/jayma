@@ -9,13 +9,13 @@ import com.jayma.pos.BuildConfig
  */
 object PerformanceMonitor {
     
-    private val isDebug = BuildConfig.DEBUG
+    private val isDebug: Boolean = BuildConfig.DEBUG
     
     /**
      * Measure execution time of a block
      */
     inline fun <T> measureTime(operation: String, block: () -> T): T {
-        if (!isDebug) {
+        if (!BuildConfig.DEBUG) {
             return block()
         }
         
@@ -32,7 +32,7 @@ object PerformanceMonitor {
      * Measure execution time of a suspend block
      */
     suspend inline fun <T> measureTimeSuspend(operation: String, block: () -> T): T {
-        if (!isDebug) {
+        if (!BuildConfig.DEBUG) {
             return block()
         }
         

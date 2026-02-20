@@ -1,5 +1,6 @@
 package com.jayma.pos.ui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -8,6 +9,7 @@ import com.jayma.pos.sync.SyncInitializer
 import com.jayma.pos.ui.cart.CartFragment
 import com.jayma.pos.ui.products.ProductListFragment
 import com.jayma.pos.ui.reports.SalesReportFragment
+import com.jayma.pos.ui.settings.TenantSettingsActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -56,6 +58,12 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.beginTransaction()
                         .replace(binding.fragmentContainer.id, SalesReportFragment())
                         .commit()
+                    true
+                }
+                com.jayma.pos.R.id.nav_settings -> {
+                    // Navigate to tenant settings
+                    val intent = Intent(this, TenantSettingsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 else -> false

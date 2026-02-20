@@ -179,6 +179,7 @@ class CartViewModel @Inject constructor(
                 // Create sale details
                 val saleDetails = state.cartItems.map { cartItem ->
                     com.jayma.pos.data.local.entities.SaleDetailEntity(
+                        saleLocalId = 0, // Will be set by repository
                         productId = cartItem.product.id,
                         productVariantId = cartItem.product.productVariantId,
                         quantity = cartItem.quantity,
@@ -191,6 +192,7 @@ class CartViewModel @Inject constructor(
                 // Create payment
                 val payments = listOf(
                     com.jayma.pos.data.local.entities.PaymentEntity(
+                        saleLocalId = 0, // Will be set by repository
                         paymentMethodId = paymentMethodId,
                         amount = paymentAmount,
                         change = (paymentAmount - state.total).coerceAtLeast(0.0)

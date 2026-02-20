@@ -50,9 +50,23 @@ class SharedPreferencesHelper @Inject constructor(
         return sharedPreferences.getLong(KEY_LAST_SYNC, 0)
     }
     
+    fun saveApiBaseUrl(baseUrl: String) {
+        sharedPreferences.edit().putString(KEY_API_BASE_URL, baseUrl.trim()).apply()
+    }
+    
+    fun getApiBaseUrl(): String? {
+        val url = sharedPreferences.getString(KEY_API_BASE_URL, null)
+        return if (url.isNullOrBlank()) null else url.trim()
+    }
+    
+    fun clearApiBaseUrl() {
+        sharedPreferences.edit().remove(KEY_API_BASE_URL).apply()
+    }
+    
     companion object {
         private const val KEY_DEFAULT_WAREHOUSE = "default_warehouse"
         private const val KEY_DEFAULT_CLIENT = "default_client"
         private const val KEY_LAST_SYNC = "last_sync"
+        private const val KEY_API_BASE_URL = "api_base_url"
     }
 }

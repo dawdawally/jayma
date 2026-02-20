@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:text="Total Sales"
                 android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="?android:attr/textColorSecondary" />
 
             <TextView
                 android:id="@+id/totalSales"
@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:text="Total Transactions"
                 android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="?android:attr/textColorSecondary" />
 
             <TextView
                 android:id="@+id/totalTransactions"
@@ -105,14 +105,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="16dp"
-                android:background="?attr/colorOutline" />
+                android:background="?android:attr/listDivider" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Average Sale"
                 android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="?android:attr/textColorSecondary" />
 
             <TextView
                 android:id="@+id/averageSale"
@@ -127,14 +127,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="16dp"
-                android:background="?attr/colorOutline" />
+                android:background="?android:attr/listDivider" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Top Product"
                 android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="?android:attr/textColorSecondary" />
 
             <TextView
                 android:id="@+id/topProduct"

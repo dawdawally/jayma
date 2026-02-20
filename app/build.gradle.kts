@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -23,17 +26,48 @@ android {
             arguments {
                 arg("room.schemaLocation", "$projectDir/schemas")
             }
+            javacOptions {
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
+                option("--add-exports", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
+            }
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                val keystoreProperties = Properties()
+                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+                
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
+    }
+    
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
+            // ✅ Enable code shrinking, obfuscation, and optimization
             isMinifyEnabled = true
+            // ✅ Enable resource shrinking to remove unused resources
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // ✅ Additional performance optimizations
+            isDebuggable = false
+            isJniDebuggable = false
+            isPseudoLocalesEnabled = false
         }
         debug {
             isDebuggable = true
@@ -59,9 +93,11 @@ android {
 dependencies {
     // Core Android
     implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     
     // Lifecycle & ViewModel
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -92,6 +128,7 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")

@@ -2,6 +2,7 @@ package com.jayma.pos.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 // Draft detail (line item) - separate table with foreign key
@@ -14,6 +15,9 @@ import androidx.room.PrimaryKey
             childColumns = ["draftLocalId"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["draftLocalId"])
     ]
 )
 data class DraftDetailEntity(

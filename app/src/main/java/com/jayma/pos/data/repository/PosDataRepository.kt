@@ -22,6 +22,14 @@ class PosDataRepository @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val posData = response.body()!!
                 
+                // Validate defaultWarehouse and defaultClient
+                if (posData.defaultWarehouse <= 0) {
+                    return Result.failure(Exception("Invalid default warehouse ID: ${posData.defaultWarehouse}. Please configure a default warehouse in the system."))
+                }
+                if (posData.defaultClient <= 0) {
+                    return Result.failure(Exception("Invalid default client ID: ${posData.defaultClient}. Please configure a default client in the system."))
+                }
+                
                 // Cache clients locally
                 val clients = posData.clients.map { client ->
                     ClientEntity(
@@ -40,6 +48,8 @@ class PosDataRepository @Inject constructor(
             } else {
                 Result.failure(Exception("Failed to fetch POS data: ${response.message()}"))
             }
+        } catch (e: NumberFormatException) {
+            Result.failure(Exception("Failed to parse POS data: Invalid number format. Please check API response format."))
         } catch (e: Exception) {
             Result.failure(e)
         }

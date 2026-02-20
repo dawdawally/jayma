@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -42,8 +43,22 @@ class BarcodeScannerFragment : Fragment() {
     private var isScanning = false
     private var lastScannedBarcode: String? = null
     
-    companion object {
-        private const val CAMERA_PERMISSION_REQUEST_CODE = 1001
+    // Permission launcher using the new Activity Result API
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startCamera()
+            isScanning = true
+            _binding?.scanButton?.text = getString(com.jayma.pos.R.string.scanning)
+        } else {
+            Toast.makeText(
+                context,
+                "Camera permission is required for barcode scanning",
+                Toast.LENGTH_LONG
+            ).show()
+            parentFragmentManager.popBackStack()
+        }
     }
     
     override fun onCreateView(
@@ -70,10 +85,7 @@ class BarcodeScannerFragment : Fragment() {
             isScanning = true
             binding.scanButton.text = getString(com.jayma.pos.R.string.scanning)
         } else {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_REQUEST_CODE
-            )
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
     
@@ -226,25 +238,6 @@ class BarcodeScannerFragment : Fragment() {
         requireContext(),
         Manifest.permission.CAMERA
     ) == PackageManager.PERMISSION_GRANTED
-    
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(
-                    context,
-                    "Camera permission is required for barcode scanning",
-                    Toast.LENGTH_LONG
-                ).show()
-                parentFragmentManager.popBackStack()
-            }
-        }
-    }
     
     override fun onDestroyView() {
         super.onDestroyView()

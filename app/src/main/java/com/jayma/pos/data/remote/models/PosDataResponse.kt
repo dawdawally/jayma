@@ -1,5 +1,6 @@
 package com.jayma.pos.data.remote.models
 
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 
 data class PosDataResponse(
@@ -8,8 +9,10 @@ data class PosDataResponse(
     @SerializedName("brands")
     val brands: List<BrandResponse>,
     @SerializedName("defaultWarehouse")
+    @JsonAdapter(IntDeserializer::class)
     val defaultWarehouse: Int,
     @SerializedName("defaultClient")
+    @JsonAdapter(IntDeserializer::class)
     val defaultClient: Int,
     @SerializedName("default_client_name")
     val defaultClientName: String,

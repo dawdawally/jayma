@@ -25,6 +25,29 @@ class CheckoutCartAdapter(
     override fun onBindViewHolder(holder: CheckoutCartViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
+    
+    override fun onBindViewHolder(
+        holder: CheckoutCartViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isNotEmpty()) {
+            // Handle partial updates
+            val cartItem = getItem(position)
+            
+            @Suppress("UNCHECKED_CAST")
+            val changes = payloads.firstOrNull() as? List<String>
+            if (changes != null) {
+                holder.updatePartial(cartItem, changes)
+            } else {
+                // If payload format is unexpected, do full bind
+                holder.bind(cartItem)
+            }
+        } else {
+            // Full bind
+            holder.bind(getItem(position))
+        }
+    }
 
     class CheckoutCartViewHolder(
         private val binding: ItemCheckoutCartBinding,
@@ -36,20 +59,38 @@ class CheckoutCartAdapter(
             binding.apply {
                 productName.text = cartItem.product.name
                 productPrice.text = String.format("$%.2f each", cartItem.unitPrice)
-                quantityText.text = cartItem.quantity.toInt().toString()
+                
+                // Always update quantity text to ensure it reflects current state
+                val quantity = cartItem.quantity.toInt()
+                quantityText.text = quantity.toString()
                 subtotal.text = String.format("$%.2f", cartItem.subtotal)
 
+                // Clear previous listeners to avoid multiple callbacks
+                increaseButton.setOnClickListener(null)
+                decreaseButton.setOnClickListener(null)
+
+                // Set new listeners with current product ID
+                val productId = cartItem.product.id
                 increaseButton.setOnClickListener {
-                    if (cartItem.quantity < cartItem.product.qteSale) {
-                        onIncreaseQuantity(cartItem.product.id)
-                    }
+                    onIncreaseQuantity(productId)
                 }
 
                 decreaseButton.setOnClickListener {
-                    if (cartItem.quantity > 1) {
-                        onDecreaseQuantity(cartItem.product.id)
-                    } else {
-                        onDecreaseQuantity(cartItem.product.id) // Will remove if quantity becomes 0
+                    onDecreaseQuantity(productId)
+                }
+            }
+        }
+        
+        fun updatePartial(cartItem: CartItem, changes: List<String>) {
+            binding.apply {
+                changes.forEach { change ->
+                    when (change) {
+                        "quantity" -> {
+                            quantityText.text = cartItem.quantity.toInt().toString()
+                        }
+                        "subtotal" -> {
+                            subtotal.text = String.format("$%.2f", cartItem.subtotal)
+                        }
                     }
                 }
             }
@@ -62,7 +103,23 @@ class CheckoutCartAdapter(
         }
 
         override fun areContentsTheSame(oldItem: CartItem, newItem: CartItem): Boolean {
-            return oldItem == newItem
+            // Compare all relevant fields to detect changes
+            return oldItem.quantity == newItem.quantity &&
+                   oldItem.unitPrice == newItem.unitPrice &&
+                   oldItem.subtotal == newItem.subtotal &&
+                   oldItem.product.name == newItem.product.name
+        }
+        
+        override fun getChangePayload(oldItem: CartItem, newItem: CartItem): Any? {
+            // Return a payload to indicate what changed for partial updates
+            val payload = mutableListOf<String>()
+            if (oldItem.quantity != newItem.quantity) {
+                payload.add("quantity")
+            }
+            if (oldItem.subtotal != newItem.subtotal) {
+                payload.add("subtotal")
+            }
+            return if (payload.isEmpty()) null else payload
         }
     }
 }

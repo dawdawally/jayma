@@ -2,13 +2,20 @@ package com.jayma.pos.ui.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.jayma.pos.data.local.entities.ClientEntity
+import com.jayma.pos.data.local.entities.WarehouseEntity
+import com.jayma.pos.data.repository.PosDataRepository
 import com.jayma.pos.databinding.ActivityTenantSettingsBinding
+import com.jayma.pos.sync.SyncManager
 import com.jayma.pos.ui.setup.PosSetupActivity
 import com.jayma.pos.util.SharedPreferencesHelper
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,12 +27,24 @@ class TenantSettingsActivity : AppCompatActivity() {
     @Inject
     lateinit var sharedPreferences: SharedPreferencesHelper
     
+    @Inject
+    lateinit var syncManager: SyncManager
+    
+    @Inject
+    lateinit var posDataRepository: PosDataRepository
+    
+    private var warehouses: List<WarehouseEntity> = emptyList()
+    private var clients: List<ClientEntity> = emptyList()
+    private var warehouseAdapter: ArrayAdapter<String>? = null
+    private var clientAdapter: ArrayAdapter<String>? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTenantSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
         setupViews()
+        loadWarehousesAndClients()
         loadCurrentSettings()
     }
     
@@ -59,6 +78,118 @@ class TenantSettingsActivity : AppCompatActivity() {
         
         binding.clearButton.setOnClickListener {
             clearDomain()
+        }
+        
+        binding.syncButton.setOnClickListener {
+            syncData()
+        }
+        
+        // Setup warehouse spinner
+        binding.warehouseSpinner.setOnItemClickListener { _, _, position, _ ->
+            val selectedWarehouse = warehouses[position]
+            sharedPreferences.saveDefaultWarehouse(selectedWarehouse.id)
+            Toast.makeText(this, "Warehouse set to: ${selectedWarehouse.name}", Toast.LENGTH_SHORT).show()
+        }
+        
+        // Setup client spinner
+        binding.clientSpinner.setOnItemClickListener { _, _, position, _ ->
+            val selectedClient = clients[position]
+            sharedPreferences.saveDefaultClient(selectedClient.id)
+            Toast.makeText(this, "Default client set to: ${selectedClient.name}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun loadWarehousesAndClients() {
+        lifecycleScope.launch {
+            try {
+                // Load warehouses
+                warehouses = posDataRepository.getAllWarehouses().first()
+                if (warehouses.size > 1) {
+                    // Show warehouse dropdown if more than one warehouse
+                    binding.warehouseInputLayout.visibility = View.VISIBLE
+                    val warehouseNames = warehouses.map { it.name }
+                    warehouseAdapter = ArrayAdapter(
+                        this@TenantSettingsActivity,
+                        android.R.layout.simple_dropdown_item_1line,
+                        warehouseNames
+                    )
+                    binding.warehouseSpinner.setAdapter(warehouseAdapter)
+                    
+                    // Set current selection
+                    val currentWarehouseId = sharedPreferences.getDefaultWarehouse()
+                    currentWarehouseId?.let { id ->
+                        val index = warehouses.indexOfFirst { it.id == id }
+                        if (index >= 0) {
+                            binding.warehouseSpinner.setText(warehouses[index].name, false)
+                        }
+                    }
+                } else {
+                    binding.warehouseInputLayout.visibility = View.GONE
+                }
+                
+                // Load clients
+                clients = posDataRepository.getAllClients().first()
+                val clientNames = clients.map { it.name }
+                clientAdapter = ArrayAdapter(
+                    this@TenantSettingsActivity,
+                    android.R.layout.simple_dropdown_item_1line,
+                    clientNames
+                )
+                binding.clientSpinner.setAdapter(clientAdapter)
+                
+                // Set current selection - default to "Walk-in" or first client
+                val currentClientId = sharedPreferences.getDefaultClient()
+                val defaultClient = clients.find { it.name.equals("Walk-in", ignoreCase = true) }
+                    ?: clients.firstOrNull()
+                
+                if (currentClientId != null) {
+                    val index = clients.indexOfFirst { it.id == currentClientId }
+                    if (index >= 0) {
+                        binding.clientSpinner.setText(clients[index].name, false)
+                    } else if (defaultClient != null) {
+                        binding.clientSpinner.setText(defaultClient.name, false)
+                        sharedPreferences.saveDefaultClient(defaultClient.id)
+                    }
+                } else if (defaultClient != null) {
+                    binding.clientSpinner.setText(defaultClient.name, false)
+                    sharedPreferences.saveDefaultClient(defaultClient.id)
+                }
+            } catch (e: Exception) {
+                // If data not loaded yet, try to fetch it
+                Toast.makeText(this@TenantSettingsActivity, "Loading warehouses and clients...", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun syncData() {
+        binding.syncButton.isEnabled = false
+        binding.syncButton.text = "Syncing..."
+        
+        lifecycleScope.launch {
+            try {
+                val warehouseId = sharedPreferences.getDefaultWarehouse()
+                if (warehouseId == null) {
+                    Toast.makeText(this@TenantSettingsActivity, "No warehouse configured", Toast.LENGTH_SHORT).show()
+                    binding.syncButton.isEnabled = true
+                    binding.syncButton.text = "Sync Data Now"
+                    return@launch
+                }
+                
+                // Trigger product sync and sale upload
+                syncManager.triggerProductSync()
+                syncManager.triggerSaleUpload()
+                
+                Toast.makeText(this@TenantSettingsActivity, "Sync started. Products and sales will be updated shortly.", Toast.LENGTH_LONG).show()
+                
+                // Re-enable button after a delay
+                kotlinx.coroutines.delay(2000)
+                binding.syncButton.isEnabled = true
+                binding.syncButton.text = "Sync Data Now"
+            } catch (e: Exception) {
+                Toast.makeText(this@TenantSettingsActivity, "Sync failed: ${e.message}", Toast.LENGTH_LONG).show()
+                binding.syncButton.isEnabled = true
+                binding.syncButton.text = "Sync Data Now"
+            }
         }
     }
     

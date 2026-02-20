@@ -9,9 +9,11 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jayma.pos.databinding.DialogCheckoutBinding
 import com.jayma.pos.data.repository.SaleRepository
+import com.jayma.pos.ui.adapter.CheckoutCartAdapter
 import com.jayma.pos.ui.viewmodel.CartViewModel
 import com.jayma.pos.util.printer.PrinterService
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,6 +30,8 @@ class CheckoutDialogFragment : DialogFragment() {
     
     @Inject
     lateinit var saleRepository: SaleRepository
+    
+    private lateinit var checkoutCartAdapter: CheckoutCartAdapter
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext())
@@ -47,9 +51,34 @@ class CheckoutDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerView()
         setupPaymentMethod()
         setupButtons()
         observeViewModel()
+    }
+    
+    private fun setupRecyclerView() {
+        checkoutCartAdapter = CheckoutCartAdapter(
+            onIncreaseQuantity = { productId ->
+                val currentQuantity = viewModel.uiState.value.cartItems
+                    .find { it.product.id == productId }?.quantity ?: 0.0
+                viewModel.updateQuantity(productId, currentQuantity + 1.0)
+            },
+            onDecreaseQuantity = { productId ->
+                val currentQuantity = viewModel.uiState.value.cartItems
+                    .find { it.product.id == productId }?.quantity ?: 0.0
+                if (currentQuantity > 1) {
+                    viewModel.updateQuantity(productId, currentQuantity - 1.0)
+                } else {
+                    viewModel.removeFromCart(productId)
+                }
+            }
+        )
+        
+        binding.cartItemsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = checkoutCartAdapter
+        }
     }
 
     private fun setupPaymentMethod() {
@@ -72,14 +101,27 @@ class CheckoutDialogFragment : DialogFragment() {
                 Toast.makeText(context, "Please enter payment amount", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            
+            if (viewModel.uiState.value.cartItems.isEmpty()) {
+                Toast.makeText(context, "Cart is empty", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
+            checkoutInProgress = true
+            binding.confirmButton.isEnabled = false
+            binding.confirmButton.text = "Processing..."
             viewModel.checkout(paymentMethodId, paymentAmount, notes)
         }
     }
 
+    private var checkoutInProgress = false
+    
     private fun observeViewModel() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
+                // Update cart items list
+                checkoutCartAdapter.submitList(state.cartItems)
+                
                 binding.totalAmount.text = String.format("Total: $%.2f", state.total)
                 
                 // Pre-fill payment amount with total
@@ -87,16 +129,21 @@ class CheckoutDialogFragment : DialogFragment() {
                     binding.paymentAmountEditText.setText(String.format("%.2f", state.total))
                 }
 
-                // Handle checkout result
-                if (!state.isLoading && state.cartItems.isEmpty() && state.error == null) {
+                // Handle checkout result - check if checkout was in progress and now cart is empty
+                if (checkoutInProgress && !state.isLoading && state.cartItems.isEmpty() && state.error == null) {
+                    checkoutInProgress = false
                     // Checkout successful - print receipt
                     printReceiptAfterCheckout()
                     Toast.makeText(context, "Sale completed successfully!", Toast.LENGTH_SHORT).show()
+                    
+                    // Refresh reports by triggering a reload
+                    // The reports fragment will auto-update when it becomes visible
                     dismiss()
                 }
 
                 // Handle errors
                 state.error?.let { error ->
+                    checkoutInProgress = false
                     Toast.makeText(context, error, Toast.LENGTH_LONG).show()
                 }
             }

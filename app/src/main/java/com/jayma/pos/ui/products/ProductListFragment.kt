@@ -60,14 +60,39 @@ class ProductListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        productAdapter = ProductAdapter { product ->
-            // Add product to cart
-            cartViewModel.addToCart(product, 1.0)
-            Toast.makeText(context, "${product.name} added to cart", Toast.LENGTH_SHORT).show()
-        }
+        productAdapter = ProductAdapter(
+            onItemClick = { product ->
+                // Navigate to product detail (if needed)
+            },
+            onAddToCart = { product ->
+                cartViewModel.addToCart(product, 1.0)
+                Toast.makeText(context, "${product.name} added to cart", Toast.LENGTH_SHORT).show()
+            },
+            onIncreaseQuantity = { productId ->
+                cartViewModel.updateQuantity(productId, cartViewModel.uiState.value.cartItems
+                    .find { it.product.id == productId }?.quantity?.plus(1.0) ?: 1.0)
+            },
+            onDecreaseQuantity = { productId ->
+                val currentQuantity = cartViewModel.uiState.value.cartItems
+                    .find { it.product.id == productId }?.quantity ?: 0.0
+                if (currentQuantity > 1) {
+                    cartViewModel.updateQuantity(productId, currentQuantity - 1.0)
+                } else {
+                    cartViewModel.removeFromCart(productId)
+                }
+            },
+            cartItems = emptyList() // Will be updated via observeViewModel
+        )
 
+        // Responsive grid: 2 columns on phones, 3-4 on tablets/POS devices
+        val spanCount = if (resources.configuration.screenWidthDp >= 600) {
+            if (resources.configuration.screenWidthDp >= 840) 4 else 3
+        } else {
+            2
+        }
+        
         binding.productsRecyclerView.apply {
-            layoutManager = GridLayoutManager(context, 2)
+            layoutManager = GridLayoutManager(context, spanCount)
             adapter = productAdapter
         }
     }
@@ -149,6 +174,39 @@ class ProductListFragment : Fragment() {
                     binding.emptyState.visibility = View.GONE
                     binding.productsRecyclerView.visibility = View.VISIBLE
                 }
+            }
+        }
+        
+        // Observe cart to update product adapter with cart items
+        lifecycleScope.launch {
+            cartViewModel.uiState.collect { cartState ->
+                // Update adapter with current cart items
+                productAdapter = ProductAdapter(
+                    onItemClick = { product ->
+                        // Navigate to product detail (if needed)
+                    },
+                    onAddToCart = { product ->
+                        cartViewModel.addToCart(product, 1.0)
+                        Toast.makeText(context, "${product.name} added to cart", Toast.LENGTH_SHORT).show()
+                    },
+                    onIncreaseQuantity = { productId ->
+                        val currentQuantity = cartState.cartItems
+                            .find { it.product.id == productId }?.quantity ?: 0.0
+                        cartViewModel.updateQuantity(productId, currentQuantity + 1.0)
+                    },
+                    onDecreaseQuantity = { productId ->
+                        val currentQuantity = cartState.cartItems
+                            .find { it.product.id == productId }?.quantity ?: 0.0
+                        if (currentQuantity > 1) {
+                            cartViewModel.updateQuantity(productId, currentQuantity - 1.0)
+                        } else {
+                            cartViewModel.removeFromCart(productId)
+                        }
+                    },
+                    cartItems = cartState.cartItems
+                )
+                binding.productsRecyclerView.adapter = productAdapter
+                productAdapter.submitList(productViewModel.uiState.value.products)
             }
         }
     }

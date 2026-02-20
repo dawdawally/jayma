@@ -39,6 +39,12 @@ class SalesReportFragment : Fragment() {
         viewModel.loadTodayReport()
     }
     
+    override fun onResume() {
+        super.onResume()
+        // Reload report when fragment becomes visible (e.g., after checkout)
+        viewModel.loadTodayReport()
+    }
+    
     private fun setupButtons() {
         binding.todayButton.setOnClickListener {
             viewModel.loadTodayReport()

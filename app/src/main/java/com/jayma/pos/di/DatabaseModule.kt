@@ -40,6 +40,9 @@ object DatabaseModule {
     fun provideClientDao(database: AppDatabase): ClientDao = database.clientDao()
     
     @Provides
+    fun provideWarehouseDao(database: AppDatabase): WarehouseDao = database.warehouseDao()
+    
+    @Provides
     fun provideSaleDao(database: AppDatabase): SaleDao = database.saleDao()
     
     @Provides

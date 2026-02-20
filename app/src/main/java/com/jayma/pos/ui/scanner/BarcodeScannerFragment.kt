@@ -13,12 +13,15 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.databinding.FragmentBarcodeScannerBinding
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.jayma.pos.ui.cart.CartFragment
 import com.jayma.pos.ui.viewmodel.BarcodeScannerViewModel
+import com.jayma.pos.ui.viewmodel.CartViewModel
 import com.jayma.pos.util.scanner.BarcodeScannerService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -34,6 +37,7 @@ class BarcodeScannerFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val viewModel: BarcodeScannerViewModel by viewModels()
+    private lateinit var cartViewModel: CartViewModel
     
     @Inject
     lateinit var barcodeScannerService: BarcodeScannerService
@@ -72,6 +76,9 @@ class BarcodeScannerFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Initialize CartViewModel from activity scope
+        cartViewModel = ViewModelProvider(requireActivity())[CartViewModel::class.java]
         
         cameraExecutor = Executors.newSingleThreadExecutor()
         
@@ -219,19 +226,35 @@ class BarcodeScannerFragment : Fragment() {
     }
     
     private fun handleScanSuccess(product: ProductEntity) {
+        // Add product to cart immediately
+        cartViewModel.addToCart(product, 1.0)
+        
         Toast.makeText(
             context,
-            "Product found: ${product.name}",
+            "${product.name} added to cart",
             Toast.LENGTH_SHORT
         ).show()
         
-        // Navigate back and add product to cart
-        // This will be handled by the parent fragment/activity
-        parentFragmentManager.popBackStack()
+        // Navigate to Cart screen to show real-time updates
+        try {
+            val mainActivity = requireActivity()
+            if (mainActivity is com.jayma.pos.ui.MainActivity) {
+                // Navigate to cart fragment
+                mainActivity.supportFragmentManager.beginTransaction()
+                    .replace(com.jayma.pos.R.id.fragmentContainer, CartFragment())
+                    .commit()
+                
+                // Update bottom navigation to show cart is selected
+                mainActivity.binding.bottomNavigation.selectedItemId = com.jayma.pos.R.id.nav_cart
+            }
+        } catch (e: Exception) {
+            // Fallback: just pop back stack
+            parentFragmentManager.popBackStack()
+        }
         
-        // Trigger callback to add product to cart
-        // We'll use a callback interface or ViewModel communication
-        viewModel.onProductFound(product)
+        // Reset scanner for next scan
+        viewModel.reset()
+        lastScannedBarcode = null
     }
     
     private fun allPermissionsGranted() = ContextCompat.checkSelfPermission(

@@ -27,12 +27,12 @@ abstract class AppDatabase : RoomDatabase() {
     
     abstract fun productDao(): ProductDao
     abstract fun clientDao(): ClientDao
+    abstract fun warehouseDao(): WarehouseDao
     abstract fun saleDao(): SaleDao
     abstract fun draftDao(): DraftDao
     abstract fun syncStatusDao(): SyncStatusDao
     
     // Additional DAOs can be added here as needed
-    // abstract fun warehouseDao(): WarehouseDao
     // abstract fun categoryDao(): CategoryDao
     // abstract fun brandDao(): BrandDao
     // abstract fun paymentMethodDao(): PaymentMethodDao

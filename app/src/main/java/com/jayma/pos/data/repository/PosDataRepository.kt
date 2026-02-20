@@ -13,6 +13,7 @@ import javax.inject.Singleton
 class PosDataRepository @Inject constructor(
     private val apiService: ApiService,
     private val clientDao: ClientDao,
+    private val warehouseDao: com.jayma.pos.data.local.dao.WarehouseDao,
     private val sharedPreferences: SharedPreferencesHelper
 ) {
     
@@ -56,6 +57,16 @@ class PosDataRepository @Inject constructor(
                 }
                 clientDao.insertClients(clients)
                 
+                // Cache warehouses locally
+                val warehouses = posData.warehouses.map { warehouse ->
+                    WarehouseEntity(
+                        id = warehouse.id,
+                        name = warehouse.name,
+                        isDefault = warehouse.id == posData.defaultWarehouse
+                    )
+                }
+                warehouseDao.insertWarehouses(warehouses)
+                
                 // Save default warehouse and client
                 sharedPreferences.saveDefaultWarehouse(posData.defaultWarehouse)
                 sharedPreferences.saveDefaultClient(posData.defaultClient)
@@ -74,4 +85,8 @@ class PosDataRepository @Inject constructor(
     fun getAllClients(): Flow<List<ClientEntity>> = clientDao.getAllClients()
     
     suspend fun getDefaultClient(): ClientEntity? = clientDao.getDefaultClient()
+    
+    fun getAllWarehouses(): Flow<List<WarehouseEntity>> = warehouseDao.getAllWarehouses()
+    
+    suspend fun getDefaultWarehouse(): WarehouseEntity? = warehouseDao.getDefaultWarehouse()
 }

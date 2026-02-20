@@ -12,18 +12,31 @@
         android:padding="16dp">
 
         <!-- Cart Items List -->
+        <TextView
+            android:id="@+id/cartItemsTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Cart Items:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/cartItemsRecyclerView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:minHeight="120dp"
-            android:maxHeight="300dp"
+            android:minHeight="100dp"
+            android:maxHeight="250dp"
             android:clipToPadding="false"
             android:padding="4dp"
             android:nestedScrollingEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cartItemsTitle"
             tools:listitem="@layout/item_checkout_cart"
             tools:itemCount="3" />
 
@@ -41,6 +54,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cartItemsRecyclerView"
             tools:text="Total: $105.00" />
+
+        <!-- Empty cart message (shown when no items) -->
+        <TextView
+            android:id="@+id/emptyCartMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="No items in cart"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cartItemsTitle" />
 
         <!-- Payment Amount -->
         <com.google.android.material.textfield.TextInputLayout

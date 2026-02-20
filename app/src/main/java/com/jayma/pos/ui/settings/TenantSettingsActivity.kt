@@ -107,6 +107,7 @@ class TenantSettingsActivity : AppCompatActivity() {
                 if (warehouses.size > 1) {
                     // Show warehouse dropdown if more than one warehouse
                     binding.warehouseInputLayout.visibility = View.VISIBLE
+                    binding.dividerView.visibility = View.VISIBLE
                     val warehouseNames = warehouses.map { it.name }
                     warehouseAdapter = ArrayAdapter(
                         this@TenantSettingsActivity,
@@ -125,6 +126,7 @@ class TenantSettingsActivity : AppCompatActivity() {
                     }
                 } else {
                     binding.warehouseInputLayout.visibility = View.GONE
+                    binding.dividerView.visibility = View.GONE
                 }
                 
                 // Load clients

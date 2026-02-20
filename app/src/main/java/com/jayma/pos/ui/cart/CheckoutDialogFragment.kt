@@ -34,18 +34,41 @@ class CheckoutDialogFragment : DialogFragment() {
     private lateinit var checkoutCartAdapter: CheckoutCartAdapter
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialAlertDialogBuilder(requireContext())
+        _binding = DialogCheckoutBinding.inflate(layoutInflater)
+        
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("Checkout")
+            .setView(binding.root)
             .create()
+        
+        return dialog
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Configure dialog window after it's shown
+        dialog?.window?.let { window ->
+            window.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            // Ensure dialog appears on top with proper dimming
+            window.setDimAmount(0.5f)
+            // Ensure dialog is above everything
+            window.setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            )
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = DialogCheckoutBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        // View is already created in onCreateDialog
+        return _binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -121,6 +144,15 @@ class CheckoutDialogFragment : DialogFragment() {
             viewModel.uiState.collect { state ->
                 // Update cart items list
                 checkoutCartAdapter.submitList(state.cartItems)
+                
+                // Show/hide empty cart message
+                if (state.cartItems.isEmpty()) {
+                    binding.emptyCartMessage.visibility = View.VISIBLE
+                    binding.cartItemsRecyclerView.visibility = View.GONE
+                } else {
+                    binding.emptyCartMessage.visibility = View.GONE
+                    binding.cartItemsRecyclerView.visibility = View.VISIBLE
+                }
                 
                 binding.totalAmount.text = String.format("Total: $%.2f", state.total)
                 

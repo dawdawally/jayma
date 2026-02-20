@@ -9,13 +9,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.net.UnknownHostException
 import javax.inject.Inject
 
 data class PosSetupUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val setupComplete: Boolean = false,
-    val progressMessage: String = "Initializing POS..."
+    val progressMessage: String = "Initializing POS...",
+    val shouldNavigateToSettings: Boolean = false // Flag to indicate host resolution error
 )
 
 @HiltViewModel
@@ -70,18 +72,40 @@ class PosSetupViewModel @Inject constructor(
                         )
                     },
                     onFailure = { error ->
+                        // Check if it's a host resolution error
+                        val isHostError = error is UnknownHostException || 
+                                         error.cause is UnknownHostException ||
+                                         error.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
+                                         error.message?.contains("UnknownHostException", ignoreCase = true) == true
+                        
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            error = "Failed to initialize POS: ${error.message}",
-                            setupComplete = false
+                            error = if (isHostError) {
+                                "Unable to connect to server. Please check your domain settings."
+                            } else {
+                                "Failed to initialize POS: ${error.message}"
+                            },
+                            setupComplete = false,
+                            shouldNavigateToSettings = isHostError
                         )
                     }
                 )
             } catch (e: Exception) {
+                // Check if it's a host resolution error
+                val isHostError = e is UnknownHostException || 
+                                 e.cause is UnknownHostException ||
+                                 e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
+                                 e.message?.contains("UnknownHostException", ignoreCase = true) == true
+                
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "Unexpected error: ${e.message}",
-                    setupComplete = false
+                    error = if (isHostError) {
+                        "Unable to connect to server. Please check your domain settings."
+                    } else {
+                        "Unexpected error: ${e.message}"
+                    },
+                    setupComplete = false,
+                    shouldNavigateToSettings = isHostError
                 )
             }
         }

@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:padding="24dp">
 
+    <!-- Header Section -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Tenant Configuration"
+        android:text="Settings"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="?attr/colorPrimary"
@@ -23,244 +29,260 @@
         android:id="@+id/subtitleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Enter your tenant domain to connect to your POS system"
+        android:text="Configure your POS system settings"
         android:textSize="14sp"
         android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleText" />
 
-    <TextView
-        android:id="@+id/currentDomainLabel"
+    <!-- Domain Configuration Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/domainCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Current Domain:"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorPrimary"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/subtitleText" />
-
-    <TextView
-        android:id="@+id/currentDomainText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Not configured"
-        android:textSize="16sp"
-        android:textColor="?attr/colorPrimary"
-        android:padding="12dp"
-        android:background="?android:attr/colorBackground"
         android:layout_marginBottom="24dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currentDomainLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/subtitleText">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/domainInputLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Tenant Domain"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currentDomainText"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/domainEditText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textUri"
-            android:imeOptions="actionDone"
-            android:maxLines="1"
-            tools:text="https://gmexperteng.com" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Domain Configuration"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp" />
 
-    <TextView
-        android:id="@+id/helpText"
+            <TextView
+                android:id="@+id/currentDomainLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Current Domain:"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/currentDomainText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Not configured"
+                android:textSize="14sp"
+                android:textColor="?attr/colorPrimary"
+                android:padding="8dp"
+                android:background="?android:attr/colorBackground"
+                android:layout_marginBottom="16dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/domainInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tenant Domain"
+                android:layout_marginBottom="8dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/domainEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:imeOptions="actionDone"
+                    android:maxLines="1"
+                    tools:text="https://gmexperteng.com" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/helpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Example: https://yourdomain.com\nMake sure to include http:// or https://"
+                android:textSize="11sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/clearButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clear"
+                    android:layout_marginEnd="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/saveButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Save" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Data Synchronization Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/syncCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Example: https://yourdomain.com\n\nMake sure to include http:// or https://"
-        android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary"
         android:layout_marginBottom="24dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/domainInputLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/domainCard">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/saveButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Save Domain"
-        android:layout_marginBottom="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/helpText" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/clearButton"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Clear Domain"
-        android:layout_marginBottom="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/saveButton" />
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clearButton" />
-
-    <TextView
-        android:id="@+id/syncTitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Data Synchronization"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorPrimary"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider" />
-
-    <TextView
-        android:id="@+id/syncSubtitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Manually sync products and sales data from the server"
-        android:textSize="14sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/syncTitleText" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/syncButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Sync Data Now"
-        android:icon="@android:drawable/ic_menu_upload"
-        app:iconGravity="textStart"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/syncSubtitleText" />
-
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/syncButton" />
-
-    <TextView
-        android:id="@+id/warehouseTitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Warehouse Selection"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorPrimary"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider2" />
-
-    <TextView
-        android:id="@+id/warehouseSubtitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Select which warehouse to use for this device"
-        android:textSize="14sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginBottom="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/warehouseTitleText" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/warehouseInputLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Select Warehouse"
-        android:layout_marginBottom="24dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/warehouseSubtitleText">
-
-        <AutoCompleteTextView
-            android:id="@+id/warehouseSpinner"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:focusable="false"
-            android:clickable="true" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <TextView
-        android:id="@+id/clientTitleText"
+            <TextView
+                android:id="@+id/syncTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Data Synchronization"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/syncSubtitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Manually sync products and sales data from the server"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/syncButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sync Data Now"
+                android:icon="@android:drawable/ic_menu_upload"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Warehouse & Client Selection Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/selectionCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Client Selection"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorPrimary"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/warehouseInputLayout" />
-
-    <TextView
-        android:id="@+id/clientSubtitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Select default client for sales (default: Walk-in)"
-        android:textSize="14sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginBottom="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clientTitleText" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/clientInputLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Select Client"
         android:layout_marginBottom="24dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clientSubtitleText">
+        app:layout_constraintTop_toBottomOf="@+id/syncCard">
 
-        <AutoCompleteTextView
-            android:id="@+id/clientSpinner"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:focusable="false"
-            android:clickable="true" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/warehouseTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Warehouse Selection"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/warehouseSubtitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select which warehouse to use for this device"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/warehouseInputLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select Warehouse"
+                android:layout_marginBottom="20dp"
+                android:visibility="gone">
+
+                <AutoCompleteTextView
+                    android:id="@+id/warehouseSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:id="@+id/dividerView"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                android:layout_marginVertical="12dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/clientTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Client Selection"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/clientSubtitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select default client for sales (default: Walk-in)"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clientInputLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select Client">
+
+                <AutoCompleteTextView
+                    android:id="@+id/clientSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

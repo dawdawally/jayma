@@ -36,9 +36,9 @@ class CartAdapter(
             binding.apply {
                 productName.text = cartItem.product.name
                 productCode.text = cartItem.product.code
-                unitPrice.text = String.format("$%.2f", cartItem.unitPrice)
+                unitPrice.text = String.format("$%.2f each", cartItem.unitPrice)
                 quantityText.text = cartItem.quantity.toInt().toString()
-                subtotal.text = String.format("$%.2f", cartItem.subtotal)
+                subtotal.text = String.format("Subtotal: $%.2f", cartItem.subtotal)
 
                 // Quantity controls
                 decreaseButton.setOnClickListener {

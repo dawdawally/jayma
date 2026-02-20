@@ -17,9 +17,54 @@ class ProductAdapter(
     private val onItemClick: (ProductEntity) -> Unit,
     private val onAddToCart: (ProductEntity) -> Unit,
     private val onIncreaseQuantity: (Int) -> Unit,
-    private val onDecreaseQuantity: (Int) -> Unit,
-    private val cartItems: List<CartItem> = emptyList()
+    private val onDecreaseQuantity: (Int) -> Unit
 ) : ListAdapter<ProductEntity, ProductAdapter.ProductViewHolder>(ProductDiffCallback()) {
+
+    private var cartItems: List<CartItem> = emptyList()
+
+    fun updateCartItems(newCartItems: List<CartItem>) {
+        // Only update if cart items actually changed
+        if (cartItems == newCartItems) {
+            return
+        }
+        
+        val oldCartItems = cartItems.toList()
+        cartItems = newCartItems
+        
+        // Find which product IDs changed
+        val oldProductIds = oldCartItems.map { it.product.id }.toSet()
+        val newProductIds = newCartItems.map { it.product.id }.toSet()
+        val allProductIds = oldProductIds + newProductIds
+        
+        val changedProductIds = allProductIds.filter { productId ->
+            val oldItem = oldCartItems.find { it.product.id == productId }
+            val newItem = newCartItems.find { it.product.id == productId }
+            oldItem?.quantity != newItem?.quantity || (oldItem == null) != (newItem == null)
+        }
+        
+        // Notify only items that changed
+        if (changedProductIds.isEmpty()) {
+            return
+        }
+        
+        // Find positions of changed items and notify them
+        val changedPositions = mutableListOf<Int>()
+        for (i in 0 until itemCount) {
+            try {
+                val product = getItem(i)
+                if (changedProductIds.contains(product.id)) {
+                    changedPositions.add(i)
+                }
+            } catch (e: Exception) {
+                // Continue if item not available
+            }
+        }
+        
+        // Notify changed positions
+        changedPositions.forEach { position ->
+            notifyItemChanged(position)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ItemProductBinding.inflate(
@@ -48,18 +93,21 @@ class ProductAdapter(
                 productCode.text = product.code
                 productPrice.text = String.format("$%.2f", product.netPrice)
                 
-                // Show stock with alert if low
-                val stockText = if (StockAlertHelper.isLowStock(product)) {
-                    "⚠️ Low: ${product.qteSale.toInt()}"
-                } else {
-                    "Stock: ${product.qteSale.toInt()}"
+                // Show stock status - check for out of stock first
+                val isOutOfStock = product.qteSale <= 0
+                val isLowStock = !isOutOfStock && StockAlertHelper.isLowStock(product)
+                
+                val stockText = when {
+                    isOutOfStock -> "Out of Stock"
+                    isLowStock -> "⚠️ Low: ${product.qteSale.toInt()}"
+                    else -> "Stock: ${product.qteSale.toInt()}"
                 }
                 productStock.text = stockText
                 productStock.setTextColor(
-                    if (StockAlertHelper.isLowStock(product)) {
-                        root.context.getColor(android.R.color.holo_red_dark)
-                    } else {
-                        root.context.getColor(android.R.color.darker_gray)
+                    when {
+                        isOutOfStock -> root.context.getColor(android.R.color.holo_red_dark)
+                        isLowStock -> root.context.getColor(android.R.color.holo_red_dark)
+                        else -> root.context.getColor(android.R.color.darker_gray)
                     }
                 )
 
@@ -95,13 +143,26 @@ class ProductAdapter(
                             onIncreaseQuantity(product.id)
                         }
                     }
+                    
+                    // Disable increase button if out of stock or at max
+                    increaseButton.isEnabled = !isOutOfStock && cartItem.quantity < product.qteSale
                 } else {
                     // Show add to cart button
                     addToCartButton.visibility = ViewGroup.VISIBLE
                     quantityControls.visibility = ViewGroup.GONE
                     
+                    // Disable add button if out of stock
+                    addToCartButton.isEnabled = !isOutOfStock
+                    if (isOutOfStock) {
+                        addToCartButton.text = "Out of Stock"
+                    } else {
+                        addToCartButton.text = "Add"
+                    }
+                    
                     addToCartButton.setOnClickListener {
-                        onAddToCart(product)
+                        if (!isOutOfStock) {
+                            onAddToCart(product)
+                        }
                     }
                 }
 

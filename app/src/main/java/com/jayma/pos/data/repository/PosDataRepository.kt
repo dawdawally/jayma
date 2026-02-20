@@ -6,6 +6,7 @@ import com.jayma.pos.data.remote.models.PosDataResponse
 import com.jayma.pos.data.remote.services.ApiService
 import com.jayma.pos.util.SharedPreferencesHelper
 import kotlinx.coroutines.flow.Flow
+import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -77,8 +78,18 @@ class PosDataRepository @Inject constructor(
             }
         } catch (e: NumberFormatException) {
             Result.failure(Exception("Failed to parse POS data: Invalid number format. Please check API response format."))
+        } catch (e: UnknownHostException) {
+            // Host resolution error - wrap it to preserve the exception type
+            Result.failure(UnknownHostException("Unable to resolve host. Please check your domain settings."))
         } catch (e: Exception) {
-            Result.failure(e)
+            // Check if the cause is UnknownHostException
+            if (e.cause is UnknownHostException || 
+                e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
+                e.message?.contains("UnknownHostException", ignoreCase = true) == true) {
+                Result.failure(UnknownHostException("Unable to resolve host. Please check your domain settings."))
+            } else {
+                Result.failure(e)
+            }
         }
     }
     

@@ -65,6 +65,13 @@ class PosSetupActivity : AppCompatActivity() {
                     binding.progressBar.visibility = android.view.View.GONE
                     
                     if (state.error != null) {
+                        // If host resolution error, navigate to settings
+                        if (state.shouldNavigateToSettings) {
+                            onSplashComplete()
+                            navigateToSettings()
+                            return@collect
+                        }
+                        
                         binding.errorMessage.text = state.error
                         binding.errorMessage.visibility = android.view.View.VISIBLE
                         binding.retryButton.visibility = android.view.View.VISIBLE
@@ -77,6 +84,13 @@ class PosSetupActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    
+    private fun navigateToSettings() {
+        val intent = Intent(this, TenantSettingsActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
     
     private fun setupRetryButton() {

@@ -46,7 +46,7 @@
             android:textColor="?android:attr/textColorSecondary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/productCode"
-            tools:text="$25.50" />
+            tools:text="$25.50 each" />
 
         <LinearLayout
             android:id="@+id/quantityControls"
@@ -96,10 +96,11 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary"
+            android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/removeButton"
             app:layout_constraintTop_toBottomOf="@+id/quantityControls"
-            tools:text="$51.00" />
+            tools:text="Subtotal: $51.00" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/removeButton"

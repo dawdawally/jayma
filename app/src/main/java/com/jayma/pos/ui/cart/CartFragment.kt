@@ -56,7 +56,10 @@ class CartFragment : Fragment() {
             }
         )
 
-        binding.cartItemsRecyclerView.adapter = cartAdapter
+        binding.cartItemsRecyclerView.apply {
+            adapter = cartAdapter
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        }
     }
 
     private fun setupButtons() {

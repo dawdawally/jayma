@@ -69,8 +69,9 @@ class ProductListFragment : Fragment() {
                 Toast.makeText(context, "${product.name} added to cart", Toast.LENGTH_SHORT).show()
             },
             onIncreaseQuantity = { productId ->
-                cartViewModel.updateQuantity(productId, cartViewModel.uiState.value.cartItems
-                    .find { it.product.id == productId }?.quantity?.plus(1.0) ?: 1.0)
+                val currentQuantity = cartViewModel.uiState.value.cartItems
+                    .find { it.product.id == productId }?.quantity ?: 0.0
+                cartViewModel.updateQuantity(productId, currentQuantity + 1.0)
             },
             onDecreaseQuantity = { productId ->
                 val currentQuantity = cartViewModel.uiState.value.cartItems
@@ -80,8 +81,7 @@ class ProductListFragment : Fragment() {
                 } else {
                     cartViewModel.removeFromCart(productId)
                 }
-            },
-            cartItems = emptyList() // Will be updated via observeViewModel
+            }
         )
 
         // Responsive grid: 2 columns on phones, 3-4 on tablets/POS devices
@@ -180,33 +180,8 @@ class ProductListFragment : Fragment() {
         // Observe cart to update product adapter with cart items
         lifecycleScope.launch {
             cartViewModel.uiState.collect { cartState ->
-                // Update adapter with current cart items
-                productAdapter = ProductAdapter(
-                    onItemClick = { product ->
-                        // Navigate to product detail (if needed)
-                    },
-                    onAddToCart = { product ->
-                        cartViewModel.addToCart(product, 1.0)
-                        Toast.makeText(context, "${product.name} added to cart", Toast.LENGTH_SHORT).show()
-                    },
-                    onIncreaseQuantity = { productId ->
-                        val currentQuantity = cartState.cartItems
-                            .find { it.product.id == productId }?.quantity ?: 0.0
-                        cartViewModel.updateQuantity(productId, currentQuantity + 1.0)
-                    },
-                    onDecreaseQuantity = { productId ->
-                        val currentQuantity = cartState.cartItems
-                            .find { it.product.id == productId }?.quantity ?: 0.0
-                        if (currentQuantity > 1) {
-                            cartViewModel.updateQuantity(productId, currentQuantity - 1.0)
-                        } else {
-                            cartViewModel.removeFromCart(productId)
-                        }
-                    },
-                    cartItems = cartState.cartItems
-                )
-                binding.productsRecyclerView.adapter = productAdapter
-                productAdapter.submitList(productViewModel.uiState.value.products)
+                // Update adapter with current cart items without recreating it
+                productAdapter.updateCartItems(cartState.cartItems)
             }
         }
     }

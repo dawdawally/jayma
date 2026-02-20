@@ -207,6 +207,11 @@ class CartViewModel @Inject constructor(
                 // Background sync (every 5 minutes) will also handle it as a backup
                 syncManager.triggerSaleUpload()
                 
+                // Trigger product sync to pull latest stock information after sale
+                // This ensures stock quantities are updated to reflect the items sold
+                // The server will have decremented stock, and we need to sync to get updated quantities
+                syncManager.triggerProductSync()
+                
                 // Clear cart on success
                 clearCart()
                 _uiState.value = _uiState.value.copy(

@@ -132,8 +132,16 @@ class ProductAdapter(
                     // Show quantity controls
                     addToCartButton.visibility = ViewGroup.GONE
                     quantityControls.visibility = ViewGroup.VISIBLE
-                    quantityText.text = cartItem.quantity.toInt().toString()
                     
+                    // Always update quantity text to ensure it reflects current state
+                    val currentQuantity = cartItem.quantity.toInt()
+                    quantityText.text = currentQuantity.toString()
+                    
+                    // Clear previous listeners
+                    decreaseButton.setOnClickListener(null)
+                    increaseButton.setOnClickListener(null)
+                    
+                    // Set new listeners
                     decreaseButton.setOnClickListener {
                         onDecreaseQuantity(product.id)
                     }

@@ -60,13 +60,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/decreaseButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="0dp"
                 android:padding="8dp"
                 android:text="−"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="?attr/colorPrimary" />
 
             <TextView
                 android:id="@+id/quantityText"
@@ -80,13 +81,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/increaseButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="0dp"
                 android:padding="8dp"
                 android:text="+"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="?attr/colorPrimary" />
         </LinearLayout>
 
         <TextView

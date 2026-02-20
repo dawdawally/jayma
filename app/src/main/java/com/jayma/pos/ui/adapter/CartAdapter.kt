@@ -37,10 +37,18 @@ class CartAdapter(
                 productName.text = cartItem.product.name
                 productCode.text = cartItem.product.code
                 unitPrice.text = String.format("$%.2f each", cartItem.unitPrice)
-                quantityText.text = cartItem.quantity.toInt().toString()
+                
+                // Always update quantity text to ensure it reflects current state
+                val currentQuantity = cartItem.quantity.toInt()
+                quantityText.text = currentQuantity.toString()
                 subtotal.text = String.format("Subtotal: $%.2f", cartItem.subtotal)
 
-                // Quantity controls
+                // Clear previous listeners
+                decreaseButton.setOnClickListener(null)
+                increaseButton.setOnClickListener(null)
+                removeButton.setOnClickListener(null)
+
+                // Set new listeners
                 decreaseButton.setOnClickListener {
                     val newQuantity = (cartItem.quantity - 1).coerceAtLeast(0.0)
                     onQuantityChange(cartItem.product.id, newQuantity)
@@ -66,7 +74,11 @@ class CartAdapter(
         }
 
         override fun areContentsTheSame(oldItem: CartItem, newItem: CartItem): Boolean {
-            return oldItem == newItem
+            // Compare all relevant fields to detect changes
+            return oldItem.quantity == newItem.quantity &&
+                   oldItem.unitPrice == newItem.unitPrice &&
+                   oldItem.subtotal == newItem.subtotal &&
+                   oldItem.product.name == newItem.product.name
         }
     }
 }

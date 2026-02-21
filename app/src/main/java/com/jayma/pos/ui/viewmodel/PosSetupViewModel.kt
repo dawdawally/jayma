@@ -50,17 +50,37 @@ class PosSetupViewModel @Inject constructor(
                             progressMessage = "Loading products..."
                         )
                         
-                        // Step 2: Sync products for default warehouse
+                        // Step 2: Sync first page immediately for instant feedback
                         val warehouseId = posData.defaultWarehouse
-                        val syncResult = productRepository.syncAllProducts(warehouseId)
+                        val firstPageResult = productRepository.syncFirstPage(warehouseId)
                         
-                        syncResult.fold(
-                            onSuccess = { productCount ->
+                        firstPageResult.fold(
+                            onSuccess = { firstPageCount ->
+                                // Show first page immediately
                                 _uiState.value = _uiState.value.copy(
                                     isLoading = false,
                                     setupComplete = true,
-                                    progressMessage = "Loaded $productCount products"
+                                    progressMessage = "Loaded $firstPageCount products (loading more...)"
                                 )
+                                
+                                // Load remaining products in background
+                                viewModelScope.launch {
+                                    val remainingResult = productRepository.syncRemainingProducts(warehouseId)
+                                    remainingResult.fold(
+                                        onSuccess = { remainingCount ->
+                                            val totalCount = firstPageCount + remainingCount
+                                            _uiState.value = _uiState.value.copy(
+                                                progressMessage = "Loaded $totalCount products"
+                                            )
+                                        },
+                                        onFailure = { error ->
+                                            // Don't fail setup if remaining pages fail, just log
+                                            _uiState.value = _uiState.value.copy(
+                                                progressMessage = "Loaded $firstPageCount products (some failed to load)"
+                                            )
+                                        }
+                                    )
+                                }
                             },
                             onFailure = { error ->
                                 _uiState.value = _uiState.value.copy(

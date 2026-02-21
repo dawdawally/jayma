@@ -43,6 +43,9 @@ object DatabaseModule {
     fun provideWarehouseDao(database: AppDatabase): WarehouseDao = database.warehouseDao()
     
     @Provides
+    fun providePaymentMethodDao(database: AppDatabase): PaymentMethodDao = database.paymentMethodDao()
+    
+    @Provides
     fun provideSaleDao(database: AppDatabase): SaleDao = database.saleDao()
     
     @Provides

@@ -13,8 +13,11 @@ import androidx.lifecycle.get
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jayma.pos.data.local.entities.ProductEntity
 import com.jayma.pos.databinding.FragmentProductListBinding
+import com.jayma.pos.databinding.FragmentProductListSplitBinding
 import com.jayma.pos.ui.adapter.ProductAdapter
+import com.jayma.pos.ui.adapter.CartAdapter
 import com.jayma.pos.ui.cart.CartFragment
+import com.jayma.pos.ui.cart.CheckoutDialogFragment
 import com.jayma.pos.ui.scanner.BarcodeScannerFragment
 import com.jayma.pos.ui.viewmodel.BarcodeScannerViewModel
 import com.jayma.pos.ui.viewmodel.CartViewModel
@@ -29,6 +32,9 @@ class ProductListFragment : Fragment() {
 
     private var _binding: FragmentProductListBinding? = null
     private val binding get() = _binding!!
+    
+    private var _splitBinding: FragmentProductListSplitBinding? = null
+    private val splitBinding get() = _splitBinding!!
 
     private val productViewModel: ProductViewModel by viewModels()
     private val cartViewModel: CartViewModel by viewModels({ requireActivity() })
@@ -38,14 +44,25 @@ class ProductListFragment : Fragment() {
     lateinit var sharedPreferences: SharedPreferencesHelper
 
     private lateinit var productAdapter: ProductAdapter
+    private var cartAdapter: CartAdapter? = null
+    private var isSplitScreen = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentProductListBinding.inflate(inflater, container, false)
-        return binding.root
+        // Check if screen is large enough for split screen (600dp = tablet/POS size)
+        val screenWidthDp = resources.configuration.screenWidthDp
+        isSplitScreen = screenWidthDp >= 600
+        
+        return if (isSplitScreen) {
+            _splitBinding = FragmentProductListSplitBinding.inflate(inflater, container, false)
+            splitBinding.root
+        } else {
+            _binding = FragmentProductListBinding.inflate(inflater, container, false)
+            binding.root
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,8 +72,38 @@ class ProductListFragment : Fragment() {
         setupSearch()
         setupPullToRefresh()
         setupBarcodeScanner()
+        if (isSplitScreen) {
+            setupSplitScreenCart()
+        }
         observeViewModel()
         observeBarcodeScanner()
+    }
+    
+    private fun setupSplitScreenCart() {
+        cartAdapter = CartAdapter(
+            onQuantityChange = { productId, quantity ->
+                cartViewModel.updateQuantity(productId, quantity)
+            },
+            onRemoveItem = { productId ->
+                cartViewModel.removeFromCart(productId)
+            }
+        )
+        
+        splitBinding.cartItemsRecyclerView.apply {
+            adapter = cartAdapter
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        }
+        
+        splitBinding.checkoutButton.setOnClickListener {
+            CheckoutDialogFragment.newInstance().show(
+                childFragmentManager,
+                "CheckoutDialog"
+            )
+        }
+        
+        splitBinding.clearCartButton.setOnClickListener {
+            cartViewModel.clearCart()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -91,14 +138,26 @@ class ProductListFragment : Fragment() {
             2
         }
         
-        binding.productsRecyclerView.apply {
+        val productsRecyclerView = if (isSplitScreen) {
+            splitBinding.productsRecyclerView
+        } else {
+            binding.productsRecyclerView
+        }
+        
+        productsRecyclerView.apply {
             layoutManager = GridLayoutManager(context, spanCount)
             adapter = productAdapter
         }
     }
 
     private fun setupSearch() {
-        binding.searchView.setOnQueryTextListener(object :
+        val searchView = if (isSplitScreen) {
+            splitBinding.searchView
+        } else {
+            binding.searchView
+        }
+        
+        searchView.setOnQueryTextListener(object :
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
@@ -112,19 +171,31 @@ class ProductListFragment : Fragment() {
     }
 
     private fun setupPullToRefresh() {
-        binding.swipeRefreshLayout.setOnRefreshListener {
+        val swipeRefreshLayout = if (isSplitScreen) {
+            splitBinding.swipeRefreshLayout
+        } else {
+            binding.swipeRefreshLayout
+        }
+        
+        swipeRefreshLayout.setOnRefreshListener {
             val warehouseId = sharedPreferences.getDefaultWarehouse()
             if (warehouseId != null) {
                 productViewModel.syncProducts(warehouseId)
             } else {
-                binding.swipeRefreshLayout.isRefreshing = false
+                swipeRefreshLayout.isRefreshing = false
                 Toast.makeText(context, "No warehouse selected", Toast.LENGTH_SHORT).show()
             }
         }
     }
     
     private fun setupBarcodeScanner() {
-        binding.scanButton.setOnClickListener {
+        val scanButton = if (isSplitScreen) {
+            splitBinding.scanButton
+        } else {
+            binding.scanButton
+        }
+        
+        scanButton.setOnClickListener {
             // Open barcode scanner fragment
             val scannerFragment = BarcodeScannerFragment()
             // Replace in the fragment container (same container used by MainActivity)
@@ -159,7 +230,12 @@ class ProductListFragment : Fragment() {
                 productAdapter.submitList(state.products)
 
                 // Handle loading state
-                binding.swipeRefreshLayout.isRefreshing = state.isLoading
+                val swipeRefreshLayout = if (isSplitScreen) {
+                    splitBinding.swipeRefreshLayout
+                } else {
+                    binding.swipeRefreshLayout
+                }
+                swipeRefreshLayout.isRefreshing = state.isLoading
 
                 // Handle error state
                 state.error?.let { error ->
@@ -167,12 +243,22 @@ class ProductListFragment : Fragment() {
                 }
 
                 // Show empty state
-                if (state.products.isEmpty() && !state.isLoading) {
-                    binding.emptyState.visibility = View.VISIBLE
-                    binding.productsRecyclerView.visibility = View.GONE
+                if (isSplitScreen) {
+                    if (state.products.isEmpty() && !state.isLoading) {
+                        splitBinding.emptyState.visibility = View.VISIBLE
+                        splitBinding.productsRecyclerView.visibility = View.GONE
+                    } else {
+                        splitBinding.emptyState.visibility = View.GONE
+                        splitBinding.productsRecyclerView.visibility = View.VISIBLE
+                    }
                 } else {
-                    binding.emptyState.visibility = View.GONE
-                    binding.productsRecyclerView.visibility = View.VISIBLE
+                    if (state.products.isEmpty() && !state.isLoading) {
+                        binding.emptyState.visibility = View.VISIBLE
+                        binding.productsRecyclerView.visibility = View.GONE
+                    } else {
+                        binding.emptyState.visibility = View.GONE
+                        binding.productsRecyclerView.visibility = View.VISIBLE
+                    }
                 }
             }
         }
@@ -182,6 +268,31 @@ class ProductListFragment : Fragment() {
             cartViewModel.uiState.collect { cartState ->
                 // Update adapter with current cart items without recreating it
                 productAdapter.updateCartItems(cartState.cartItems)
+                
+                // Update split screen cart if available
+                if (isSplitScreen) {
+                    cartAdapter?.submitList(cartState.cartItems)
+                    
+                    // Update totals
+                    splitBinding.subtotalValue.text = String.format("$%.2f", cartState.subtotal)
+                    splitBinding.taxValue.text = String.format("$%.2f", cartState.tax)
+                    splitBinding.discountValue.text = String.format("$%.2f", cartState.discount)
+                    splitBinding.shippingValue.text = String.format("$%.2f", cartState.shipping)
+                    splitBinding.totalValue.text = String.format("$%.2f", cartState.total)
+                    
+                    // Show/hide empty state
+                    if (cartState.cartItems.isEmpty()) {
+                        splitBinding.emptyStateCart.visibility = View.VISIBLE
+                        splitBinding.cartItemsRecyclerView.visibility = View.GONE
+                        splitBinding.checkoutButton.isEnabled = false
+                    } else {
+                        splitBinding.emptyStateCart.visibility = View.GONE
+                        splitBinding.cartItemsRecyclerView.visibility = View.VISIBLE
+                        splitBinding.checkoutButton.isEnabled = true
+                    }
+                    
+                    splitBinding.checkoutButton.isEnabled = !cartState.isLoading && cartState.cartItems.isNotEmpty()
+                }
             }
         }
     }
@@ -189,5 +300,6 @@ class ProductListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        _splitBinding = null
     }
 }

@@ -13,10 +13,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jayma.pos.databinding.DialogCheckoutBinding
 import com.jayma.pos.data.repository.SaleRepository
+import com.jayma.pos.data.repository.PosDataRepository
+import com.jayma.pos.data.local.entities.PaymentMethodEntity
 import com.jayma.pos.ui.adapter.CheckoutCartAdapter
 import com.jayma.pos.ui.viewmodel.CartViewModel
 import com.jayma.pos.util.printer.PrinterService
+import com.jayma.pos.util.SharedPreferencesHelper
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +35,15 @@ class CheckoutDialogFragment : DialogFragment() {
     @Inject
     lateinit var saleRepository: SaleRepository
     
+    @Inject
+    lateinit var posDataRepository: PosDataRepository
+    
+    @Inject
+    lateinit var sharedPreferences: SharedPreferencesHelper
+    
     private lateinit var checkoutCartAdapter: CheckoutCartAdapter
+    private var paymentMethods: List<PaymentMethodEntity> = emptyList()
+    private var selectedPaymentMethodId: Int? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = DialogCheckoutBinding.inflate(layoutInflater)
@@ -105,9 +117,73 @@ class CheckoutDialogFragment : DialogFragment() {
     }
 
     private fun setupPaymentMethod() {
-        // TODO: Load payment methods from repository
-        // For now, use default payment method (Cash = 1)
-        binding.paymentMethodSpinner.setSelection(0)
+        lifecycleScope.launch {
+            try {
+                // Load payment methods from database
+                paymentMethods = posDataRepository.getAllPaymentMethods().first()
+                
+                if (paymentMethods.isEmpty()) {
+                    // If no payment methods in database, create default ones
+                    paymentMethods = listOf(
+                        PaymentMethodEntity(1, "Cash"),
+                        PaymentMethodEntity(2, "Credit Card"),
+                        PaymentMethodEntity(3, "Bank Transfer"),
+                        PaymentMethodEntity(4, "Wave")
+                    )
+                }
+                
+                // Create adapter for spinner
+                val paymentMethodNames = paymentMethods.map { it.name }
+                val adapter = android.widget.ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    paymentMethodNames
+                ).apply {
+                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                }
+                binding.paymentMethodSpinner.adapter = adapter
+                
+                // Set default payment method
+                val defaultPaymentMethodId = sharedPreferences.getDefaultPaymentMethod()
+                val defaultIndex = if (defaultPaymentMethodId != null) {
+                    paymentMethods.indexOfFirst { it.id == defaultPaymentMethodId }.takeIf { it >= 0 }
+                        ?: paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
+                        ?: 0
+                } else {
+                    paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
+                        ?: 0
+                }
+                
+                binding.paymentMethodSpinner.setSelection(defaultIndex)
+                selectedPaymentMethodId = paymentMethods[defaultIndex].id
+                
+                // Listen for selection changes
+                binding.paymentMethodSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                        selectedPaymentMethodId = paymentMethods[position].id
+                    }
+                    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+                }
+            } catch (e: Exception) {
+                // Fallback to default payment methods if loading fails
+                paymentMethods = listOf(
+                    PaymentMethodEntity(1, "Cash"),
+                    PaymentMethodEntity(2, "Credit Card"),
+                    PaymentMethodEntity(3, "Bank Transfer"),
+                    PaymentMethodEntity(4, "Wave")
+                )
+                val adapter = android.widget.ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    paymentMethods.map { it.name }
+                ).apply {
+                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                }
+                binding.paymentMethodSpinner.adapter = adapter
+                binding.paymentMethodSpinner.setSelection(0)
+                selectedPaymentMethodId = 1 // Cash
+            }
+        }
     }
 
     private fun setupButtons() {
@@ -116,7 +192,7 @@ class CheckoutDialogFragment : DialogFragment() {
         }
 
         binding.confirmButton.setOnClickListener {
-            val paymentMethodId = 1 // Cash - TODO: Get from spinner
+            val paymentMethodId = selectedPaymentMethodId ?: paymentMethods.firstOrNull()?.id ?: 1
             val paymentAmount = binding.paymentAmountEditText.text.toString().toDoubleOrNull() ?: 0.0
             val notes = binding.notesEditText.text.toString().takeIf { it.isNotBlank() }
 

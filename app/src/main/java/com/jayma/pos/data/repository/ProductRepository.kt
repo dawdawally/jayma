@@ -51,7 +51,7 @@ class ProductRepository @Inject constructor(
         var totalSynced = 0
         var page = 1
         var hasMore = true
-        val productsPerPage = 28 // From API documentation
+        val productsPerPage = 15 // From API documentation
         var consecutiveFailures = 0
         val maxConsecutiveFailures = 3
         
@@ -76,6 +76,53 @@ class ProductRepository @Inject constructor(
                     // Continue to next page on failure (might be temporary network issue)
                     page++
                     if (page > 100) { // Safety limit
+                        return Result.failure(Exception("Too many pages, possible infinite loop"))
+                    }
+                }
+            )
+        }
+        
+        return Result.success(totalSynced)
+    }
+    
+    /**
+     * Sync first page of products immediately for instant feedback
+     * Returns the number of products synced from the first page
+     */
+    suspend fun syncFirstPage(warehouseId: Int): Result<Int> {
+        return syncProducts(warehouseId, page = 1)
+    }
+    
+    /**
+     * Sync remaining products in background (starting from page 2)
+     * This should be called after syncFirstPage to load the rest
+     */
+    suspend fun syncRemainingProducts(warehouseId: Int): Result<Int> {
+        var totalSynced = 0
+        var page = 2 // Start from page 2
+        var hasMore = true
+        val productsPerPage = 15
+        var consecutiveFailures = 0
+        val maxConsecutiveFailures = 3
+        
+        while (hasMore) {
+            val result = syncProducts(warehouseId, page)
+            result.fold(
+                onSuccess = { count ->
+                    consecutiveFailures = 0
+                    totalSynced += count
+                    hasMore = count >= productsPerPage
+                    if (hasMore) {
+                        page++
+                    }
+                },
+                onFailure = { error ->
+                    consecutiveFailures++
+                    if (consecutiveFailures >= maxConsecutiveFailures) {
+                        return Result.failure(error)
+                    }
+                    page++
+                    if (page > 100) {
                         return Result.failure(Exception("Too many pages, possible infinite loop"))
                     }
                 }

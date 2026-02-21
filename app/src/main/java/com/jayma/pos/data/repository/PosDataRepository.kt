@@ -15,6 +15,7 @@ class PosDataRepository @Inject constructor(
     private val apiService: ApiService,
     private val clientDao: ClientDao,
     private val warehouseDao: com.jayma.pos.data.local.dao.WarehouseDao,
+    private val paymentMethodDao: com.jayma.pos.data.local.dao.PaymentMethodDao,
     private val sharedPreferences: SharedPreferencesHelper
 ) {
     
@@ -68,6 +69,27 @@ class PosDataRepository @Inject constructor(
                 }
                 warehouseDao.insertWarehouses(warehouses)
                 
+                // Cache payment methods locally
+                val paymentMethods = posData.paymentMethods.map { paymentMethod ->
+                    PaymentMethodEntity(
+                        id = paymentMethod.id,
+                        name = paymentMethod.name
+                    )
+                }
+                paymentMethodDao.insertPaymentMethods(paymentMethods)
+                
+                // Set default payment method to Cash if not set
+                val defaultPaymentMethodId = sharedPreferences.getDefaultPaymentMethod()
+                if (defaultPaymentMethodId == null) {
+                    // Find Cash payment method or use first one
+                    val cashMethod = paymentMethods.find { it.name.equals("Cash", ignoreCase = true) }
+                    cashMethod?.let {
+                        sharedPreferences.saveDefaultPaymentMethod(it.id)
+                    } ?: paymentMethods.firstOrNull()?.let {
+                        sharedPreferences.saveDefaultPaymentMethod(it.id)
+                    }
+                }
+                
                 // Save default warehouse and client
                 sharedPreferences.saveDefaultWarehouse(posData.defaultWarehouse)
                 sharedPreferences.saveDefaultClient(posData.defaultClient)
@@ -100,4 +122,8 @@ class PosDataRepository @Inject constructor(
     fun getAllWarehouses(): Flow<List<WarehouseEntity>> = warehouseDao.getAllWarehouses()
     
     suspend fun getDefaultWarehouse(): WarehouseEntity? = warehouseDao.getDefaultWarehouse()
+    
+    fun getAllPaymentMethods(): Flow<List<PaymentMethodEntity>> = paymentMethodDao.getAllPaymentMethods()
+    
+    suspend fun getPaymentMethodById(id: Int): PaymentMethodEntity? = paymentMethodDao.getPaymentMethodById(id)
 }

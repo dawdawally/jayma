@@ -63,9 +63,19 @@ class SharedPreferencesHelper @Inject constructor(
         sharedPreferences.edit().remove(KEY_API_BASE_URL).apply()
     }
     
+    fun saveDefaultPaymentMethod(paymentMethodId: Int) {
+        sharedPreferences.edit().putInt(KEY_DEFAULT_PAYMENT_METHOD, paymentMethodId).apply()
+    }
+    
+    fun getDefaultPaymentMethod(): Int? {
+        val id = sharedPreferences.getInt(KEY_DEFAULT_PAYMENT_METHOD, -1)
+        return if (id == -1) null else id
+    }
+    
     companion object {
         private const val KEY_DEFAULT_WAREHOUSE = "default_warehouse"
         private const val KEY_DEFAULT_CLIENT = "default_client"
+        private const val KEY_DEFAULT_PAYMENT_METHOD = "default_payment_method"
         private const val KEY_LAST_SYNC = "last_sync"
         private const val KEY_API_BASE_URL = "api_base_url"
     }

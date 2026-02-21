@@ -100,6 +100,9 @@
                     android:inputType="textUri"
                     android:imeOptions="actionDone"
                     android:maxLines="1"
+                    android:enabled="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     tools:text="https://gmexperteng.com" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -111,6 +114,16 @@
                 android:text="Example: https://yourdomain.com\nMake sure to include http:// or https://"
                 android:textSize="11sp"
                 android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/unlockDomainButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Unlock Domain Editing"
+                android:icon="@android:drawable/ic_lock_open"
+                app:iconGravity="textStart"
                 android:layout_marginBottom="12dp" />
 
             <LinearLayout
@@ -125,13 +138,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Clear"
+                    android:enabled="false"
                     android:layout_marginEnd="8dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/saveButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Save" />
+                    android:text="Save"
+                    android:enabled="false" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -168,7 +183,7 @@
                 android:id="@+id/syncSubtitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Manually sync products and sales data from the server"
+                android:text="Manually sync all data (products, clients, warehouses, payment methods, sales) from the server"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginBottom="12dp" />
@@ -277,6 +292,50 @@
 
                 <AutoCompleteTextView
                     android:id="@+id/clientSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:minHeight="56dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+            
+            <View
+                android:id="@+id/paymentMethodDividerView"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                android:layout_marginVertical="12dp" />
+            
+            <TextView
+                android:id="@+id/paymentMethodTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Payment Method Selection"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="4dp" />
+            
+            <TextView
+                android:id="@+id/paymentMethodSubtitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select default payment method for checkout (default: Cash)"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp" />
+            
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/paymentMethodInputLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select Payment Method"
+                android:minHeight="56dp">
+                
+                <AutoCompleteTextView
+                    android:id="@+id/paymentMethodSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:inputType="none"

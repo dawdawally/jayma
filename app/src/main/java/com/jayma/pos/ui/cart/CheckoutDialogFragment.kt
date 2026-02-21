@@ -144,23 +144,29 @@ class CheckoutDialogFragment : DialogFragment() {
                 binding.paymentMethodSpinner.adapter = adapter
                 
                 // Set default payment method
-                val defaultPaymentMethodId = sharedPreferences.getDefaultPaymentMethod()
-                val defaultIndex = if (defaultPaymentMethodId != null) {
-                    paymentMethods.indexOfFirst { it.id == defaultPaymentMethodId }.takeIf { it >= 0 }
-                        ?: paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
-                        ?: 0
+                if (paymentMethods.isNotEmpty()) {
+                    val defaultPaymentMethodId = sharedPreferences.getDefaultPaymentMethod()
+                    val defaultIndex = if (defaultPaymentMethodId != null) {
+                        paymentMethods.indexOfFirst { it.id == defaultPaymentMethodId }.takeIf { it >= 0 }
+                            ?: paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
+                            ?: 0
+                    } else {
+                        paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
+                            ?: 0
+                    }
+                    
+                    binding.paymentMethodSpinner.setSelection(defaultIndex.coerceIn(0, paymentMethods.size - 1))
+                    selectedPaymentMethodId = paymentMethods[defaultIndex.coerceIn(0, paymentMethods.size - 1)].id
                 } else {
-                    paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
-                        ?: 0
+                    selectedPaymentMethodId = 1 // Default to Cash ID
                 }
-                
-                binding.paymentMethodSpinner.setSelection(defaultIndex)
-                selectedPaymentMethodId = paymentMethods[defaultIndex].id
                 
                 // Listen for selection changes
                 binding.paymentMethodSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                        selectedPaymentMethodId = paymentMethods[position].id
+                        if (position >= 0 && position < paymentMethods.size) {
+                            selectedPaymentMethodId = paymentMethods[position].id
+                        }
                     }
                     override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
                 }

@@ -31,10 +31,10 @@ import javax.inject.Inject
 class ProductListFragment : Fragment() {
 
     private var _binding: FragmentProductListBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = _binding ?: throw IllegalStateException("Binding not available")
     
     private var _splitBinding: FragmentProductListSplitBinding? = null
-    private val splitBinding get() = _splitBinding!!
+    private val splitBinding get() = _splitBinding ?: throw IllegalStateException("Split binding not available")
 
     private val productViewModel: ProductViewModel by viewModels()
     private val cartViewModel: CartViewModel by viewModels({ requireActivity() })

@@ -40,8 +40,11 @@ class ProductViewModel @Inject constructor(
             selectedCategoryId,
             selectedBrandId,
             showInStockOnly
-        ) { allProducts, query, categoryId, brandId, inStockOnly ->
+        ) { allProducts, query, categoryId, brandId, _ ->
             var filtered = allProducts
+
+            // Always filter out out-of-stock items (qteSale <= 0)
+            filtered = filtered.filter { it.qteSale > 0 }
 
             // Apply search filter
             if (query.isNotBlank()) {
@@ -61,11 +64,6 @@ class ProductViewModel @Inject constructor(
             // Apply brand filter
             if (brandId != null) {
                 filtered = filtered.filter { it.brandId == brandId }
-            }
-
-            // Apply stock filter
-            if (inStockOnly) {
-                filtered = filtered.filter { it.qteSale > 0 }
             }
 
             filtered

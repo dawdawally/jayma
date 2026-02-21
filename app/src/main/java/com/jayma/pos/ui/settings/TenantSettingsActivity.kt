@@ -275,10 +275,20 @@ class TenantSettingsActivity : AppCompatActivity() {
                 
                 // Set current selection
                 val currentPaymentMethodId = sharedPreferences.getDefaultPaymentMethod()
-                currentPaymentMethodId?.let { id ->
-                    val index = paymentMethods.indexOfFirst { it.id == id }
+                if (currentPaymentMethodId != null) {
+                    val index = paymentMethods.indexOfFirst { it.id == currentPaymentMethodId }
                     if (index >= 0) {
                         binding.paymentMethodSpinner.setText(paymentMethods[index].name, false)
+                    } else {
+                        // Default to Cash if available
+                        val cashMethod = paymentMethods.find { it.name.equals("Cash", ignoreCase = true) }
+                        cashMethod?.let {
+                            binding.paymentMethodSpinner.setText(it.name, false)
+                            sharedPreferences.saveDefaultPaymentMethod(it.id)
+                        } ?: paymentMethods.firstOrNull()?.let {
+                            binding.paymentMethodSpinner.setText(it.name, false)
+                            sharedPreferences.saveDefaultPaymentMethod(it.id)
+                        }
                     }
                 } else {
                     // Default to Cash if available
@@ -342,7 +352,7 @@ class TenantSettingsActivity : AppCompatActivity() {
             binding.unlockDomainButton.setIconResource(android.R.drawable.ic_lock_lock)
         } else {
             binding.unlockDomainButton.text = "Unlock Domain Editing"
-            binding.unlockDomainButton.setIconResource(android.R.drawable.ic_lock_open)
+            // Icon will be set programmatically if needed, or removed from XML
         }
     }
     

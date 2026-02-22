@@ -95,4 +95,7 @@ class SaleRepository @Inject constructor(
     
     suspend fun getPayments(saleLocalId: Long): List<PaymentEntity> = 
         saleDao.getPayments(saleLocalId)
+    
+    suspend fun getSaleDetailsForSales(saleLocalIds: List<Long>): List<SaleDetailEntity> =
+        saleDao.getSaleDetailsForSales(saleLocalIds)
 }

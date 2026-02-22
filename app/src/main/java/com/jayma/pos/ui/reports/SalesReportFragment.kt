@@ -68,6 +68,42 @@ class SalesReportFragment : Fragment() {
                 binding.topProduct.text = state.topProduct ?: "N/A"
                 
                 binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                
+                // Update button styles based on active period
+                updateButtonStyles(state.period)
+            }
+        }
+    }
+    
+    private fun updateButtonStyles(activePeriod: com.jayma.pos.ui.viewmodel.ReportPeriod) {
+        // Get colorPrimary from theme
+        val typedValue = android.util.TypedValue()
+        requireContext().theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+        val colorPrimary = typedValue.data
+        val whiteColor = androidx.core.content.ContextCompat.getColor(requireContext(), android.R.color.white)
+        
+        // Reset all buttons to outlined style (transparent background, primary text)
+        binding.todayButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
+        binding.weekButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
+        binding.monthButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
+        
+        binding.todayButton.setTextColor(colorPrimary)
+        binding.weekButton.setTextColor(colorPrimary)
+        binding.monthButton.setTextColor(colorPrimary)
+        
+        // Set active button to filled style (primary background, white text)
+        when (activePeriod) {
+            com.jayma.pos.ui.viewmodel.ReportPeriod.TODAY -> {
+                binding.todayButton.backgroundTintList = android.content.res.ColorStateList.valueOf(colorPrimary)
+                binding.todayButton.setTextColor(whiteColor)
+            }
+            com.jayma.pos.ui.viewmodel.ReportPeriod.WEEK -> {
+                binding.weekButton.backgroundTintList = android.content.res.ColorStateList.valueOf(colorPrimary)
+                binding.weekButton.setTextColor(whiteColor)
+            }
+            com.jayma.pos.ui.viewmodel.ReportPeriod.MONTH -> {
+                binding.monthButton.backgroundTintList = android.content.res.ColorStateList.valueOf(colorPrimary)
+                binding.monthButton.setTextColor(whiteColor)
             }
         }
     }

@@ -8,6 +8,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/todayButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Today"
@@ -17,6 +18,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/weekButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Week"
@@ -26,6 +28,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/monthButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Month"

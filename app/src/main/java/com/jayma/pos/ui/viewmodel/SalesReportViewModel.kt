@@ -60,8 +60,20 @@ class SalesReportViewModel @Inject constructor(
                 val totalTransactions = sales.size
                 val averageSale = if (totalTransactions > 0) totalSales / totalTransactions else 0.0
                 
-                // Find top product (simplified - would need to aggregate from sale details)
-                val topProduct = "N/A" // TODO: Implement product aggregation
+                // Find top product by aggregating sale details
+                val topProduct = if (sales.isNotEmpty()) {
+                    val saleLocalIds = sales.map { it.localId }
+                    val allSaleDetails = saleRepository.getSaleDetailsForSales(saleLocalIds)
+                    
+                    // Group by product name and sum quantities
+                    val productQuantities = allSaleDetails.groupBy { it.productName }
+                        .mapValues { (_, details) -> details.sumOf { it.quantity } }
+                    
+                    // Find product with highest quantity
+                    productQuantities.maxByOrNull { it.value }?.key ?: "N/A"
+                } else {
+                    "N/A"
+                }
                 
                 _reportState.value = _reportState.value.copy(
                     totalSales = totalSales,

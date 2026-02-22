@@ -38,6 +38,9 @@ interface SaleDao {
     @Query("SELECT * FROM sale_details WHERE saleLocalId = :saleLocalId")
     suspend fun getSaleDetails(saleLocalId: Long): List<SaleDetailEntity>
     
+    @Query("SELECT * FROM sale_details WHERE saleLocalId IN (:saleLocalIds)")
+    suspend fun getSaleDetailsForSales(saleLocalIds: List<Long>): List<SaleDetailEntity>
+    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSaleDetails(details: List<SaleDetailEntity>)
     

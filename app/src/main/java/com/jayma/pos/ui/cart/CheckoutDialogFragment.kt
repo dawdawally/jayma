@@ -132,43 +132,39 @@ class CheckoutDialogFragment : DialogFragment() {
                     )
                 }
                 
-                // Create adapter for spinner
+                // Create adapter for AutoCompleteTextView
                 val paymentMethodNames = paymentMethods.map { it.name }
                 val adapter = android.widget.ArrayAdapter(
                     requireContext(),
-                    android.R.layout.simple_spinner_item,
+                    android.R.layout.simple_dropdown_item_1line,
                     paymentMethodNames
-                ).apply {
-                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                }
-                binding.paymentMethodSpinner.adapter = adapter
+                )
+                binding.paymentMethodSpinner.setAdapter(adapter)
                 
                 // Set default payment method
                 if (paymentMethods.isNotEmpty()) {
                     val defaultPaymentMethodId = sharedPreferences.getDefaultPaymentMethod()
-                    val defaultIndex = if (defaultPaymentMethodId != null) {
-                        paymentMethods.indexOfFirst { it.id == defaultPaymentMethodId }.takeIf { it >= 0 }
-                            ?: paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
-                            ?: 0
+                    val defaultPaymentMethod = if (defaultPaymentMethodId != null) {
+                        paymentMethods.find { it.id == defaultPaymentMethodId }
                     } else {
-                        paymentMethods.indexOfFirst { it.name.equals("Cash", ignoreCase = true) }.takeIf { it >= 0 }
-                            ?: 0
+                        null
                     }
                     
-                    binding.paymentMethodSpinner.setSelection(defaultIndex.coerceIn(0, paymentMethods.size - 1))
-                    selectedPaymentMethodId = paymentMethods[defaultIndex.coerceIn(0, paymentMethods.size - 1)].id
+                    val selectedMethod = defaultPaymentMethod 
+                        ?: paymentMethods.find { it.name.equals("Cash", ignoreCase = true) }
+                        ?: paymentMethods.first()
+                    
+                    binding.paymentMethodSpinner.setText(selectedMethod.name, false)
+                    selectedPaymentMethodId = selectedMethod.id
                 } else {
                     selectedPaymentMethodId = 1 // Default to Cash ID
                 }
                 
                 // Listen for selection changes
-                binding.paymentMethodSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                        if (position >= 0 && position < paymentMethods.size) {
-                            selectedPaymentMethodId = paymentMethods[position].id
-                        }
+                binding.paymentMethodSpinner.setOnItemClickListener { _, _, position, _ ->
+                    if (position >= 0 && position < paymentMethods.size) {
+                        selectedPaymentMethodId = paymentMethods[position].id
                     }
-                    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
                 }
             } catch (e: Exception) {
                 // Fallback to default payment methods if loading fails
@@ -180,13 +176,11 @@ class CheckoutDialogFragment : DialogFragment() {
                 )
                 val adapter = android.widget.ArrayAdapter(
                     requireContext(),
-                    android.R.layout.simple_spinner_item,
+                    android.R.layout.simple_dropdown_item_1line,
                     paymentMethods.map { it.name }
-                ).apply {
-                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                }
-                binding.paymentMethodSpinner.adapter = adapter
-                binding.paymentMethodSpinner.setSelection(0)
+                )
+                binding.paymentMethodSpinner.setAdapter(adapter)
+                binding.paymentMethodSpinner.setText("Cash", false)
                 selectedPaymentMethodId = 1 // Cash
             }
         }

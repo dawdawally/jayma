@@ -115,30 +115,27 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Payment Method -->
-        <TextView
-            android:id="@+id/paymentMethodLabel"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/paymentMethodLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Payment Method"
-            android:textSize="14sp"
-            android:textStyle="bold"
             android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"
+            android:hint="Payment Method"
+            android:minHeight="56dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/notesLayout" />
-        
-        <Spinner
-            android:id="@+id/paymentMethodSpinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:minHeight="48dp"
-            android:background="@drawable/spinner_border"
-            android:padding="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/paymentMethodLabel" />
+            app:layout_constraintTop_toBottomOf="@+id/notesLayout">
+            
+            <AutoCompleteTextView
+                android:id="@+id/paymentMethodSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:inputType="none"
+                android:focusable="false"
+                android:clickable="true"
+                android:minHeight="56dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Buttons -->
         <LinearLayout
@@ -149,7 +146,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/paymentMethodSpinner">
+            app:layout_constraintTop_toBottomOf="@+id/paymentMethodLayout">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/cancelButton"
